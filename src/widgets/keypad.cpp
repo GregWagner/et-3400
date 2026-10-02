@@ -28,7 +28,7 @@ Keypad::Keypad(QWidget *parent)
 
     device = new keypad_io;
     setStyleSheet("QPushButton { margin: 0 0 0 0; padding 0 0 0 0 }");
-    setFixedSize(QSize(175, 300));
+    setFixedSize(QSize(200, 350));
     setLayout(mainLayout);
 }
 
@@ -41,13 +41,13 @@ QPushButton *Keypad::create_button(QString name, QString icon_src, QString icon_
 {
     QPushButton *button = new QPushButton(this);
     button->setObjectName(name);
-    button->setFixedSize(QSize(37, 37));
+    button->setFixedSize(QSize(45, 45));
     // button->setGeometry(QRect(0, 0, 37, 37));
 
     QIcon icon;
     icon.addFile(icon_src, QSize(), QIcon::Normal, QIcon::Off);
     button->setIcon(icon);
-    button->setIconSize(QSize(37, 37));
+    button->setIconSize(QSize(45, 45));
 
     QIcon icon_pressed;
     icon_pressed.addFile(icon_pressed_src, QSize(), QIcon::Normal, QIcon::Off);
