@@ -91,7 +91,7 @@ void LoadDialog::setupUi(QDialog *Dialog)
     retranslateUi(Dialog);
     connect(buttonBox, &QDialogButtonBox::accepted, this, &LoadDialog::validate);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &LoadDialog::reject);
-    connect(override_start_check, &QCheckBox::stateChanged, this, [this](int state) {
+    connect(override_start_check, &QCheckBox::checkStateChanged, this, [this](Qt::CheckState state) {
         bool enabled = (state == Qt::Checked);
         start_edit->setEnabled(enabled);
         end_edit->setEnabled(enabled);

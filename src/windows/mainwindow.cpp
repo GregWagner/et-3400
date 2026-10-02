@@ -27,15 +27,15 @@ MainWindow::MainWindow(QWidget *parent)
   QAction *tips_action = new QAction("Show &Tips", this);
 
   QAction *openRam_action = new QAction("&Load RAM", this);
-  openRam_action->setShortcut(Qt::CTRL + Qt::Key_O);
+  openRam_action->setShortcut(Qt::CTRL | Qt::Key_O);
 
   QAction *saveRam_action = new QAction("&Save RAM", this);
-  saveRam_action->setShortcut(Qt::CTRL + Qt::Key_S);
+  saveRam_action->setShortcut(Qt::CTRL | Qt::Key_S);
 
   QAction *openRom_action = new QAction("Load ROM", this);
 
   QAction *quit_action = new QAction("E&xit", this);
-  quit_action->setShortcut(Qt::CTRL + Qt::Key_X);
+  quit_action->setShortcut(Qt::CTRL | Qt::Key_X);
 
   QMenu *file;
   file = menuBar()->addMenu("&File");
