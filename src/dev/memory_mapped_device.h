@@ -1,0 +1,66 @@
+#ifndef MEMORY_MAPPED_DEVICE_H
+#define MEMORY_MAPPED_DEVICE_H
+
+#include <stdlib.h>
+#include <string>
+#include <functional>
+#include "../common/common_defs.h"
+#include "../util/settings.h"
+
+#define DEVICE_READ 1
+#define DEVICE_WRITE 2
+
+/*
+    Memory mapped devices
+
+    Devices are mapped into blocks of 1KB (1024). This gives 64 blocks
+    When the CPU reads or writes to memory, the address is divided by 1024 to get which block
+    it needs to access.
+
+    Some devices may share the same block, such as the keypad and the display. In this case we use
+    a linked list. Everytime we map a device to a block, we check if the block's top-level device is empty (NULL)
+    and if so, the device becomes the first device in the linked list. The next device will be added to the device's 'next' pointer.
+
+    Everytime a read or write occurs, a call to the top-level device's is_mapped(address) is made, and if it returns false, it gets passed to the next
+    device in the chain.
+*/
+
+/*
+  The base class for a memory-mapped device
+*/
+class memory_mapped_device
+{
+public:
+    virtual ~memory_mapped_device() = default;
+    virtual uint8_t read(offs_t addr) { (void)addr; return 0; }
+    virtual void write(offs_t addr, uint8_t data) { (void)addr; (void)data; }
+    virtual void write_block(offs_t addr, uint8_t *data, size_t size) { (void)addr; (void)data; (void)size; }
+    virtual bool is_mapped(offs_t addr) { (void)addr; return true; }
+    virtual uint8_t get_flags() { return DEVICE_READ | DEVICE_WRITE; }
+    virtual uint8_t *get_mapped_memory() { return nullptr; }
+    virtual offs_t get_start() { return 0; }
+    virtual offs_t get_end() { return 0; }
+    virtual offs_t get_size() { return get_end() - get_start() + 1; }
+    virtual bool is_custom() { return false; }
+    virtual void load(offs_t addr, uint8_t *data, size_t size) { (void)addr; (void)data; (void)size; }
+    void set_settings(Settings *settings) { this->settings = settings; }
+
+    std::function<void(offs_t addr, uint8_t data)> write_hook = nullptr;
+    std::function<uint8_t(offs_t addr)> read_hook = nullptr;
+
+    std::string name;
+    bool can_disassemble;
+
+    memory_mapped_device *next = nullptr;
+
+protected:
+    Settings *settings = nullptr;
+
+};
+
+struct mapped_memory_block
+{
+    memory_mapped_device *device;
+};
+
+#endif // MEMORY_MAPPED_DEVICE_H

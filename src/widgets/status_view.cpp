@@ -1,0 +1,183 @@
+#include <QDebug>
+#include "status_view.h"
+#include "../emu/et3400.h"
+
+StatusView::StatusView()
+    : QFrame(nullptr)
+{
+    setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    setLineWidth(3);
+
+    is_emulator_set = false;
+
+    m_paintTimer = new QTimer(this);
+    m_paintTimer->start(100);
+    connect(this->m_paintTimer, &QTimer::timeout, this, &StatusView::update);
+
+    QString style = "border: 1px solid black; font-size: 12pt; font-family: Courier; height: 25px;";
+    QString bits_style = "padding-right: 10px; font-size: 12pt; font-family: Courier; height: 25px;";
+
+    pc_label = new RegisterView(RegisterView::WORD, this);
+    sp_label = new RegisterView(RegisterView::WORD, this);
+    ix_label = new RegisterView(RegisterView::WORD, this);
+    acca_label = new RegisterView(RegisterView::BYTE, this);
+    accb_label = new RegisterView(RegisterView::BYTE, this);
+    cc_label = new RegisterView(RegisterView::FLAGS, this);
+    QLabel *bits_label = new QLabel("--HINZVC");
+    pc_label->setStyleSheet(style);
+    sp_label->setStyleSheet(style);
+    ix_label->setStyleSheet(style);
+    acca_label->setStyleSheet(style);
+    accb_label->setStyleSheet(style);
+    cc_label->setStyleSheet(style);
+    bits_label->setStyleSheet(bits_style);
+}
+
+StatusView::StatusView(QWidget *parent)
+    : QFrame(parent)
+{
+    setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+    setLineWidth(3);
+
+    is_emulator_set = false;
+
+    m_paintTimer = new QTimer(this);
+    m_paintTimer->start(100);
+    connect(this->m_paintTimer, &QTimer::timeout, this, &StatusView::update);
+
+    QString style = "border: 1px solid black; font-size: 12pt; font-family: Courier; height: 25px;";
+    QString bits_style = "padding-right: 10px; font-size: 12pt; font-family: Courier; height: 25px;";
+
+    pc_label = new RegisterView(RegisterView::WORD, this);
+    sp_label = new RegisterView(RegisterView::WORD, this);
+    ix_label = new RegisterView(RegisterView::WORD, this);
+    acca_label = new RegisterView(RegisterView::BYTE, this);
+    accb_label = new RegisterView(RegisterView::BYTE, this);
+    cc_label = new RegisterView(RegisterView::FLAGS, this);
+    QLabel *bits_label = new QLabel("--HINZVC");
+    pc_label->setStyleSheet(style);
+    sp_label->setStyleSheet(style);
+    ix_label->setStyleSheet(style);
+    acca_label->setStyleSheet(style);
+    accb_label->setStyleSheet(style);
+    cc_label->setStyleSheet(style);
+    bits_label->setStyleSheet(bits_style);
+
+    QGridLayout *mainLayout = new QGridLayout;
+    mainLayout->setColumnStretch(0, 1);
+    mainLayout->setColumnStretch(1, 1);
+    mainLayout->setRowStretch(0, 1);
+    mainLayout->setRowStretch(1, 1);
+    mainLayout->setRowStretch(2, 1);
+    mainLayout->setRowStretch(3, 1);
+    mainLayout->setRowStretch(4, 1);
+    mainLayout->setRowStretch(5, 1);
+    mainLayout->setRowStretch(6, 1);
+    mainLayout->setRowStretch(7, 50);
+    mainLayout->addWidget(new QLabel("PC"), 0, 0, 1, 1);
+    mainLayout->addWidget(new QLabel("SP"), 1, 0, 1, 1);
+    mainLayout->addWidget(new QLabel("IX"), 2, 0, 1, 1);
+    mainLayout->addWidget(new QLabel("ACCA"), 3, 0, 1, 1);
+    mainLayout->addWidget(new QLabel("ACCB"), 4, 0, 1, 1);
+    mainLayout->addWidget(new QLabel("CC"), 6, 0, 1, 1);
+    mainLayout->addWidget(pc_label, 0, 1, 1, 1);
+    mainLayout->addWidget(sp_label, 1, 1, 1, 1);
+    mainLayout->addWidget(ix_label, 2, 1, 1, 1);
+    mainLayout->addWidget(acca_label, 3, 1, 1, 1);
+    mainLayout->addWidget(accb_label, 4, 1, 1, 1);
+    mainLayout->addWidget(bits_label, 5, 1, 1, 1, Qt::AlignRight);
+    mainLayout->addWidget(cc_label, 6, 1, 1, 1);
+
+    // action = new QAction;
+    // connect(action, &QAction::triggered, this, &Display::redraw);
+
+    // this->setFixedSize(QSize(320, 85));
+    connect(pc_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
+            {
+        if (is_emulator_set)
+        {
+            emu_ptr->set_pc(new_value);
+        } });
+    connect(sp_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
+            {
+        if (is_emulator_set)
+        {
+            emu_ptr->set_sp(new_value);
+        } });
+    connect(ix_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
+            {
+        if (is_emulator_set)
+        {
+            emu_ptr->set_ix(new_value);
+        } });
+    connect(acca_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
+            {
+        if (is_emulator_set)
+        {
+            emu_ptr->set_acca(new_value);
+        } });
+    connect(accb_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
+            {
+        if (is_emulator_set)
+        {
+            emu_ptr->set_accb(new_value);
+        } });
+    connect(cc_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
+            {
+        if (is_emulator_set)
+        {
+            emu_ptr->set_cc(new_value);
+        } });
+
+    connect(pc_label, &RegisterView::on_edit_abort, this, [this](int reason)
+            { emit this->on_edit_abort(reason); });
+    connect(sp_label, &RegisterView::on_edit_abort, this, [this](int reason)
+            { emit this->on_edit_abort(reason); });
+    connect(ix_label, &RegisterView::on_edit_abort, this, [this](int reason)
+            { emit this->on_edit_abort(reason); });
+    connect(acca_label, &RegisterView::on_edit_abort, this, [this](int reason)
+            { emit this->on_edit_abort(reason); });
+    connect(accb_label, &RegisterView::on_edit_abort, this, [this](int reason)
+            { emit this->on_edit_abort(reason); });
+    connect(cc_label, &RegisterView::on_edit_abort, this, [this](int reason)
+            { emit this->on_edit_abort(reason); });
+
+    setLayout(mainLayout);
+    setLineWidth(3);
+}
+
+StatusView::~StatusView()
+{
+    m_paintTimer->stop();
+    delete m_paintTimer;
+}
+
+void StatusView::set_enabled(bool enabled)
+{
+    pc_label->set_enabled(enabled);
+    sp_label->set_enabled(enabled);
+    ix_label->set_enabled(enabled);
+    acca_label->set_enabled(enabled);
+    accb_label->set_enabled(enabled);
+    cc_label->set_enabled(enabled);
+}
+
+void StatusView::update()
+{
+    if (is_emulator_set)
+    {
+        CpuStatus status = emu_ptr->get_status();
+        pc_label->set_value(status.pc);
+        sp_label->set_value(status.sp);
+        ix_label->set_value(status.ix);
+        acca_label->set_value(status.acca);
+        accb_label->set_value(status.accb);
+        cc_label->set_value(status.cc);
+    }
+}
+
+void StatusView::set_emulator(et3400emu *emu)
+{
+    emu_ptr = emu;
+    is_emulator_set = true;
+}

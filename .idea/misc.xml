@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakePythonSetting">
+    <option name="pythonIntegrationState" value="YES" />
+  </component>
+  <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id>C/C++</id>
+          </State>
+          <State>
+            <id>Common Practices and Code ImprovementsC/C++</id>
+          </State>
+          <State>
+            <id>Compiler IssuesC/C++</id>
+          </State>
+          <State>
+            <id>Constraints ViolationsC/C++</id>
+          </State>
+          <State>
+            <id>Potential Code Quality IssuesC/C++</id>
+          </State>
+          <State>
+            <id>Static Analysis ToolsC/C++</id>
+          </State>
+          <State>
+            <id>Syntax StyleC/C++</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>Use preferred braces styleSyntax StyleC/C++</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+</project>

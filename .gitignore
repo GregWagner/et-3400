@@ -1,0 +1,9 @@
+build/
+.vscode
+.idea
+/Debug
+/Release
+/.vs
+/CMakeFiles
+/cmake-build-debug
+/.cache/

@@ -1,0 +1,145 @@
+cmake_minimum_required(VERSION 3.16)
+set(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE} CACHE STRING "" FORCE)
+project(et3400 VERSION 1.1.0)
+
+# Optional prerelease tag, appended to the version string as "1.01.0-<tag>".
+# Leave empty for a normal release build.
+# set(PROJECT_PRERELEASE "")
+set(PROJECT_PRERELEASE "20261001")
+
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+find_package(Qt6 COMPONENTS Core Widgets Gui REQUIRED)
+find_package(Threads REQUIRED)
+
+set(WIDGETS_SRC 
+    src/widgets/colors.cpp
+    src/widgets/display.cpp 
+    src/widgets/disassembly_view.cpp 
+    src/widgets/dip_array.cpp 
+    src/widgets/keypad.cpp 
+    src/widgets/led_array.cpp 
+    src/widgets/memory_view.cpp 
+    src/widgets/status_view.cpp
+    src/widgets/register.cpp
+    )
+
+set(WINDOWS_SRC 
+    ${WIDGETS_SRC} 
+    src/windows/mainwindow.cpp 
+    src/windows/about.cpp 
+    src/windows/breakpoints.cpp
+    src/windows/breakpoint.cpp
+    src/windows/device.cpp
+    src/windows/devices.cpp
+    src/windows/save.cpp
+    src/windows/load.cpp  
+    src/windows/clear_ram.cpp  
+    src/windows/settings.cpp  
+    src/windows/debugger.cpp 
+    src/windows/file.cpp 
+    src/windows/label.cpp 
+    src/windows/labels.cpp 
+    src/windows/remove_label.cpp 
+    src/windows/tips.cpp 
+    src/windows/goto.cpp 
+    src/windows/io.cpp
+    src/windows/io_settings.cpp
+    )
+
+set(DEVSRC 
+    src/dev/address_decoder.cpp
+    src/dev/memory_map.cpp
+    src/dev/custom_dev.cpp
+    src/dev/memory_dev.cpp 
+    src/dev/keypad_dev.cpp 
+    src/dev/display_dev.cpp
+    src/dev/io_dev.cpp
+    src/dev/mc6820.cpp
+    src/dev/rs232.cpp
+    )
+
+set(EMUSRC 
+    src/cpu/m6800.cpp 
+    src/emu/et3400.cpp
+    )
+
+set(TOOLSRC 
+    src/util/csv.cpp 
+    src/util/io.cpp
+    src/util/hex.cpp 
+    src/util/srec.cpp 
+    src/util/label.cpp 
+    src/util/breakpoint.cpp 
+    src/util/label_manager.cpp  
+    src/util/disassembly_builder.cpp 
+    src/util/memory_builder.cpp 
+    src/util/breakpoint_manager.cpp 
+    src/util/settings.cpp
+    src/util/log.cpp
+    src/util/snap.cpp
+    src/dasm/disassembler.cpp 
+    )
+
+set(SOURCES 
+    src/main.cpp 
+    src/common/util.cpp
+    ${TOOLSRC} 
+    ${DEVSRC} 
+    ${EMUSRC} 
+    ${WINDOWS_SRC} 
+    src/resources/resources.qrc 
+    src/resources/resources.rc
+    )
+
+configure_file(src/version.h.in ${CMAKE_BINARY_DIR}/version.h)
+
+add_executable(et3400
+    ${SOURCES} 
+    ${PROJECT_RESOURCES}
+    )
+
+# Enable extra compiler warnings
+if(MSVC)
+    target_compile_options(et3400 PRIVATE /W4)
+else()
+    target_compile_options(et3400 PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+add_custom_command(TARGET et3400 POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/README.md
+        $<TARGET_FILE_DIR:et3400>/README.md
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/readme.pdf
+        $<TARGET_FILE_DIR:et3400>/readme.pdf
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_SOURCE_DIR}/LICENSE
+        $<TARGET_FILE_DIR:et3400>/LICENSE
+)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+  set_property(TARGET et3400 PROPERTY WIN32_EXECUTABLE true)
+endif()
+
+
+target_include_directories(et3400 PRIVATE ${CMAKE_BINARY_DIR})
+
+target_link_libraries(et3400
+    PRIVATE
+    Qt6::Core
+    Qt6::Widgets
+    Qt6::Gui
+    Threads::Threads
+    )
+
+if(WIN32)
+    target_link_libraries(et3400 PRIVATE DbgHelp winmm)
+    target_compile_definitions(et3400 PRIVATE NOMINMAX)
+endif()

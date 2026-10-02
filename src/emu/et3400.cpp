@@ -1,0 +1,340 @@
+#include "et3400.h"
+#include "../util/log.h"
+#include <chrono>
+#include <thread>
+#include "../common/default.h"
+#include "../windows/file.h"
+#include <QString>
+
+et3400emu::et3400emu(keypad_io *keypad_dev, display_io *display_dev)
+{
+    clock_rate = DEFAULT_CLOCK_RATE;
+
+    memory_map = new MemoryMapManager;
+    breakpoints = new BreakpointManager;
+    labels = new LabelManager;
+
+    device = new m6800_cpu_device(memory_map);
+
+    device->debugger_instruction_hook = [this](uint32_t address)
+    {
+        return this->debugger_instruction_hook(address);
+    };
+
+    is_running = false;
+    cycles = 0;
+    last_pc = 0xFFFF;
+    total_cycles = 0;
+
+    ram = new memory_device("RAM", 0x0000, 0x0200, false);
+
+    this->keypad = keypad_dev;
+    this->display = display_dev;
+
+    memory_map->map(ram);
+    memory_map->map(keypad);
+    memory_map->map(display);
+}
+
+et3400emu::~et3400emu()
+{
+    stop();
+    delete ram;
+    delete memory_map;
+    delete breakpoints;
+    delete device;
+}
+
+void et3400emu::load_rom(std::string device_name, offs_t address, uint8_t *buffer, size_t size)
+{
+    memory_mapped_device *current_device = memory_map->get_block_device(address);
+
+    if (current_device != NULL)
+    {
+        LOG_DEBUG << "Unmapping device " << QString::fromStdString(current_device->name);
+        memory_map->unmap(current_device);
+        delete current_device;
+    }
+
+    memory_device *rom = new memory_device(device_name, address, size, true);
+
+    LOG_DEBUG << "Mapping device " << QString::fromStdString(rom->name) << " address: " << rom->get_start() << " size: " << rom->get_size();
+
+    rom->load(address, (uint8_t *)buffer, size);
+
+    memory_map->map(rom);
+}
+
+void et3400emu::load_ram(offs_t address, uint8_t *buffer, size_t size)
+{
+    ram->load(address, buffer, size);
+}
+
+bool et3400emu::get_running()
+{
+    return is_running;
+}
+
+CpuStatus et3400emu::get_status()
+{
+    return device->get_status();
+}
+
+void et3400emu::stop()
+{
+    if (is_running)
+    {
+        is_running = false;
+        thread.join();
+    }
+}
+
+void et3400emu::halt()
+{
+    is_running = false;
+    thread.join();
+}
+
+void et3400emu::step()
+{
+    if (!is_running)
+    {
+        if (device->reset_line == 0)
+        {
+            device->pre_execute_run();
+        }
+        else
+        {
+            device->execute_step();
+        }
+        render_frame();
+    }
+}
+
+void et3400emu::resume()
+{
+    if (!is_running)
+    {
+        is_running = true;
+        thread = std::thread(&et3400emu::worker, this);
+    }
+}
+
+void et3400emu::init()
+{
+    total_cycles = 0;
+
+    // pull keyboard lines high
+    keypad->init();
+
+    device->device_start();
+    device->device_reset();
+}
+
+void et3400emu::start()
+{
+    is_running = true;
+    thread = std::thread(&et3400emu::worker, this);
+}
+
+uint8_t et3400emu::read_byte(offs_t address)
+{
+    return memory_map->read(address);
+}
+
+void et3400emu::set_pc(uint16_t pc)
+{
+    device->m_pc.d = pc;
+}
+
+void et3400emu::set_sp(uint16_t sp)
+{
+    device->m_s.d = sp;
+}
+
+void et3400emu::set_ix(uint16_t ix)
+{
+    device->m_x.d = ix;
+}
+
+void et3400emu::set_acca(uint8_t acca)
+{
+    device->m_d.b.h = acca;
+}
+
+void et3400emu::set_accb(uint8_t accb)
+{
+    device->m_d.b.l = accb;
+}
+
+void et3400emu::set_cc(uint8_t cc)
+{
+    device->m_cc = cc;
+}
+
+void et3400emu::reset()
+{
+    device->reset_line = 0;
+}
+
+void et3400emu::pull_irq_low()
+{
+    device->m_irq_state[M6800_IRQ_LINE] = ASSERT_LINE;
+}
+
+void et3400emu::release_irq()
+{
+    device->m_irq_state[M6800_IRQ_LINE] = CLEAR_LINE;
+}
+
+void et3400emu::pull_nmi_low()
+{
+    // only the falling edge latches an NMI
+    if (!device->m_nmi_state)
+    {
+        device->m_nmi_pending = true;
+    }
+
+    device->m_nmi_state = ASSERT_LINE;
+}
+
+void et3400emu::release_nmi()
+{
+    device->m_nmi_state = CLEAR_LINE;
+}
+
+int et3400emu::get_cycles()
+{
+    return device->m_icount;
+}
+
+void et3400emu::set_clock_rate(int new_clock_rate)
+{
+    clock_rate = new_clock_rate;
+}
+
+int et3400emu::get_clock_rate()
+{
+    return clock_rate;
+}
+
+void et3400emu::worker()
+{
+    using clk = std::chrono::steady_clock;
+    using us = std::chrono::microseconds;
+
+    const int frame_us = 16667;
+    const int base_cycles = 16667;
+    const float base_rate = 1000000.f;
+
+    int cycles_per_frame = (int)(base_cycles * (float)clock_rate / (float)base_rate);
+    if (cycles_per_frame <= 10)
+        cycles_per_frame = 10;
+
+    LOG_INFO << "Emulator thread started with clock rate: " << clock_rate;
+    LOG_INFO << "CPS: " << cycles_per_frame;
+
+    auto deadline = clk::now();
+    int excess = 0;
+
+    LOG_INFO << "Reset Line: " << device->reset_line;
+    LOG_INFO << "PC: " << device->m_pc.d;
+
+    while (this->is_running)
+    {
+        cycles_per_frame = (int)(base_cycles * (float)clock_rate / (float)base_rate);
+        if (cycles_per_frame <= 10)
+            cycles_per_frame = 10;
+        device->m_icount = cycles_per_frame + excess;
+        device->pre_execute_run();
+        device->execute_run();
+        excess = device->m_icount;
+        total_cycles += cycles_per_frame - device->m_icount;
+        render_frame();
+
+        deadline += us(frame_us);
+        std::this_thread::sleep_until(deadline);
+    }
+}
+
+void et3400emu::set_step_out()
+{
+    is_step_out = true;
+}
+
+bool et3400emu::debugger_instruction_hook(uint32_t address)
+{
+    // check if debugger is active
+    if(check_breakpoint(address))
+        return true;
+
+    if (is_step_out)
+    {
+        int *table_entry = Disassembler::GetTableEntry(device->read_byte(address));
+
+        if (Disassembler::IsReturn(table_entry[0]))
+        {
+            is_step_out = false;
+            this->is_running = false;
+            on_breakpoint();
+            last_pc = address;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool et3400emu::check_breakpoint(uint32_t address)
+{
+    Breakpoint breakpoint;
+    if (breakpoints->tryGetBreakpoint(address, breakpoint) && last_pc != address && breakpoint.is_enabled)
+    {
+        if (breakpoint.is_hidden)
+        {
+            breakpoints->removeBreakpoint(address);
+        }
+        this->is_running = false;
+        on_breakpoint();
+        last_pc = address;
+        return true;
+    }
+    last_pc = 0xFFFF;
+    return false;
+}
+
+void et3400emu::handle_breakpoint()
+{
+    stop();
+    on_breakpoint();
+}
+
+void et3400emu::render_frame()
+{
+    on_render_frame();
+}
+
+memory_mapped_device *et3400emu::get_block_device(offs_t address)
+{
+    return memory_map->get_block_device(address);
+}
+
+void et3400emu::add_breakpoint(offs_t address)
+{
+    breakpoints->addBreakpoint(address);
+}
+
+void et3400emu::remove_breakpoint(offs_t address)
+{
+    breakpoints->removeBreakpoint(address);
+}
+
+bool et3400emu::has_breakpoint(offs_t address)
+{
+    return breakpoints->hasBreakpoint(address);
+}
+
+void et3400emu::add_or_remove_breakpoint(offs_t address)
+{
+    breakpoints->addOrRemoveBreakpoint(address);
+}
