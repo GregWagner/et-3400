@@ -17,22 +17,21 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-struct ClearRamSettings
-{
+struct ClearRamSettings {
     offs_t start;
     offs_t end;
     uint8_t value;
 };
 
 
-class ClearRamDialog : public QDialog
-{
+class ClearRamDialog : public QDialog {
     Q_OBJECT
 
 public:
     ClearRamDialog();
 
     void setSettings(ClearRamSettings settings);
+
     ClearRamSettings getSettings();
 
 private:
@@ -52,7 +51,9 @@ private:
     QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *Dialog);
+
     void retranslateUi(QDialog *Dialog);
+
     void validate();
 };
 

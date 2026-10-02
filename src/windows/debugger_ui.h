@@ -7,8 +7,7 @@
 #include "../util/log.h"
 #include <QActionGroup>
 
-QToolBar *DebuggerDialog::create_menu_toolbar()
-{
+QToolBar *DebuggerDialog::create_menu_toolbar() {
     QToolBar *toolbar = new QToolBar(this);
 
     QToolButton *file_button = create_file_menu(toolbar);
@@ -24,14 +23,15 @@ QToolBar *DebuggerDialog::create_menu_toolbar()
     return toolbar;
 }
 
-QToolBar *DebuggerDialog::create_shortcuts_toolbar()
-{
+QToolBar *DebuggerDialog::create_shortcuts_toolbar() {
     QToolBar *shortcut_toolbar = new QToolBar(this);
 
     MakeToolButton(shortcut_toolbar, start_button, "Run (F5)", ":/buttons/Run.png", Qt::Key_F5, start);
     MakeToolButton(shortcut_toolbar, stop_button, "Stop (F4)", ":/buttons/Stop.png", Qt::Key_F4, stop);
-    MakeToolButton(shortcut_toolbar, step_over_button, "Step Over (F10)", ":/buttons/StepOver.png", Qt::Key_F10, step_over);
-    MakeToolButton(shortcut_toolbar, step_into_button, "Step Into (F11)", ":/buttons/StepInto.png", Qt::Key_F11, step_into);
+    MakeToolButton(shortcut_toolbar, step_over_button, "Step Over (F10)", ":/buttons/StepOver.png", Qt::Key_F10,
+                   step_over);
+    MakeToolButton(shortcut_toolbar, step_into_button, "Step Into (F11)", ":/buttons/StepInto.png", Qt::Key_F11,
+                   step_into);
     // MakeToolButton(shortcut_toolbar, step_out_button, "Step Out (Shift+F11)", ":/buttons/StepOut.png", Qt::SHIFT + Qt::Key_F11, step_out);
     MakeToolButtonNS(shortcut_toolbar, reset_button, "Reset", ":/buttons/Restart.png", reset);
 
@@ -52,9 +52,7 @@ QToolBar *DebuggerDialog::create_shortcuts_toolbar()
     return shortcut_toolbar;
 }
 
-QToolButton *DebuggerDialog::create_file_menu(QToolBar *toolbar)
-{
-
+QToolButton *DebuggerDialog::create_file_menu(QToolBar *toolbar) {
     QAction *openRam_action = new QAction("&Load RAM", this);
     openRam_action->setShortcut(Qt::CTRL + Qt::Key_O);
 
@@ -109,8 +107,7 @@ QToolButton *DebuggerDialog::create_file_menu(QToolBar *toolbar)
     return file_button;
 }
 
-QToolButton *DebuggerDialog::create_debug_menu(QToolBar *toolbar)
-{
+QToolButton *DebuggerDialog::create_debug_menu(QToolBar *toolbar) {
     QToolButton *debug_button = new QToolButton(toolbar);
     debug_button->setToolButtonStyle(Qt::ToolButtonTextOnly);
     debug_button->setText("&Debug   ");
@@ -149,8 +146,7 @@ QToolButton *DebuggerDialog::create_debug_menu(QToolBar *toolbar)
     return debug_button;
 }
 
-QToolButton *DebuggerDialog::create_view_menu(QToolBar *toolbar)
-{
+QToolButton *DebuggerDialog::create_view_menu(QToolBar *toolbar) {
     QToolButton *view_button = new QToolButton(toolbar);
     view_button->setToolButtonStyle(Qt::ToolButtonTextOnly);
     view_button->setText("&View   ");
@@ -159,7 +155,8 @@ QToolButton *DebuggerDialog::create_view_menu(QToolBar *toolbar)
     QMenu *view_menu = new QMenu(view_button);
 
     MakeToggledAction(toggle_disassembly_action, "&Disassembly", Qt::CTRL + Qt::Key_D, toggle_disassembly_panel);
-    MakeToggledActionNS(toggle_autorefresh_disassembly_action, "Auto Refresh Disassembly", toggle_auto_refresh_disassembly_panel);
+    MakeToggledActionNS(toggle_autorefresh_disassembly_action, "Auto Refresh Disassembly",
+                        toggle_auto_refresh_disassembly_panel);
 
     MakeTriggeredAction(refresh_disassembly_action, "&Refresh", Qt::CTRL + Qt::Key_R, diassembly_refresh);
     MakeToggledAction(toggle_memory_action, "&Memory", Qt::CTRL + Qt::Key_M, toggle_memory_panel);
@@ -169,15 +166,15 @@ QToolButton *DebuggerDialog::create_view_menu(QToolBar *toolbar)
     set_heat_map_off_action->setCheckable(true);
     set_heat_map_off_action->setIconVisibleInMenu(false);
     set_heat_map_off_action->setToolTip("Heat Map - Off");
-    connect(set_heat_map_off_action, &QAction::toggled, this, [this](bool checked)
-            { if (checked) set_heat_map_off(); });
+    connect(set_heat_map_off_action, &QAction::toggled, this,
+            [this](bool checked) { if (checked) set_heat_map_off(); });
 
     set_heat_map_fade_action = new QAction(QIcon(":/buttons/HeatFade.png"), "&Fade\tCtrl+H, F", this);
     set_heat_map_fade_action->setCheckable(true);
     set_heat_map_fade_action->setIconVisibleInMenu(false);
     set_heat_map_fade_action->setToolTip("Heat Map - Fade");
-    connect(set_heat_map_fade_action, &QAction::toggled, this, [this](bool checked)
-            { if (checked) set_heat_map_fade(); });
+    connect(set_heat_map_fade_action, &QAction::toggled, this,
+            [this](bool checked) { if (checked) set_heat_map_fade(); });
 
     // set_heat_map_fade_slow_action = new QAction(QIcon(":/buttons/HeatFadeSlow.png"), "&Fade (Slow)", this);
     // set_heat_map_fade_slow_action->setCheckable(true);
@@ -190,20 +187,18 @@ QToolButton *DebuggerDialog::create_view_menu(QToolBar *toolbar)
     set_heat_map_persist_action->setCheckable(true);
     set_heat_map_persist_action->setIconVisibleInMenu(false);
     set_heat_map_persist_action->setToolTip("Heat Map - Persist");
-    connect(set_heat_map_persist_action, &QAction::toggled, this, [this](bool checked)
-            { if (checked) set_heat_map_persist(); });
+    connect(set_heat_map_persist_action, &QAction::toggled, this,
+            [this](bool checked) { if (checked) set_heat_map_persist(); });
 
     QShortcut *offShortcut = new QShortcut(QKeySequence("Ctrl+H, O"), this);
-    connect(offShortcut, &QShortcut::activated, this, [this]()
-            { this->set_heat_map_off_action->setChecked(true); });
+    connect(offShortcut, &QShortcut::activated, this, [this]() { this->set_heat_map_off_action->setChecked(true); });
 
     QShortcut *fadeShortcut = new QShortcut(QKeySequence("Ctrl+H, F"), this);
-    connect(fadeShortcut, &QShortcut::activated, this, [this]()
-            { this->set_heat_map_fade_action->setChecked(true); });
+    connect(fadeShortcut, &QShortcut::activated, this, [this]() { this->set_heat_map_fade_action->setChecked(true); });
 
     QShortcut *persistShortcut = new QShortcut(QKeySequence("Ctrl+H, P"), this);
-    connect(persistShortcut, &QShortcut::activated, this, [this]()
-            { this->set_heat_map_persist_action->setChecked(true); });
+    connect(persistShortcut, &QShortcut::activated, this,
+            [this]() { this->set_heat_map_persist_action->setChecked(true); });
 
     QShortcut *clearShortcut = new QShortcut(QKeySequence("Ctrl+H, C"), this);
     connect(clearShortcut, &QShortcut::activated, this, &DebuggerDialog::clear_heat_map);
@@ -280,8 +275,7 @@ QToolButton *DebuggerDialog::create_view_menu(QToolBar *toolbar)
     return view_button;
 }
 
-QToolButton *DebuggerDialog::create_settings_menu(QToolBar *toolbar)
-{
+QToolButton *DebuggerDialog::create_settings_menu(QToolBar *toolbar) {
     QToolButton *settings_button = new QToolButton(toolbar);
     settings_button->setToolButtonStyle(Qt::ToolButtonTextOnly);
     settings_button->setText("&Settings   ");
@@ -294,23 +288,20 @@ QToolButton *DebuggerDialog::create_settings_menu(QToolBar *toolbar)
     return settings_button;
 }
 
-QString DebuggerDialog::get_error_message(int reason)
-{
-    switch (reason)
-    {
-    case REGISTER_DISABLED:
-        return "Cannot edit registers while CPU is running.";
-        break;
-    case MEMORY_READ_ONLY:
-        return "Cannot edit read-only memory";
-        break;
+QString DebuggerDialog::get_error_message(int reason) {
+    switch (reason) {
+        case REGISTER_DISABLED:
+            return "Cannot edit registers while CPU is running.";
+            break;
+        case MEMORY_READ_ONLY:
+            return "Cannot edit read-only memory";
+            break;
     }
 
     return "Unknown error";
 }
 
-QGroupBox *DebuggerDialog::create_status_group()
-{
+QGroupBox *DebuggerDialog::create_status_group() {
     QGroupBox *status_groupBox = new QGroupBox("Status", this);
 
     QHBoxLayout *status_groupBox_layout = new QHBoxLayout(this);
@@ -322,14 +313,14 @@ QGroupBox *DebuggerDialog::create_status_group()
     status_groupBox->setLayout(status_groupBox_layout);
     status_groupBox->setFixedWidth(200);
 
-    connect(status_view, &StatusView::on_edit_abort, this, [this](int reason)
-            { QMessageBox::warning(this, "Edit Register", get_error_message(reason)); });
+    connect(status_view, &StatusView::on_edit_abort, this, [this](int reason) {
+        QMessageBox::warning(this, "Edit Register", get_error_message(reason));
+    });
 
     return status_groupBox;
 }
 
-QGroupBox *DebuggerDialog::create_interrupt_group()
-{
+QGroupBox *DebuggerDialog::create_interrupt_group() {
     QGroupBox *interrupt_groupBox = new QGroupBox("Interrupts", this);
 
     QHBoxLayout *interrupt_groupBox_layout = new QHBoxLayout(this);
@@ -343,21 +334,17 @@ QGroupBox *DebuggerDialog::create_interrupt_group()
     irq_button->setToolTip("Hold to pull the CPU IRQ line low");
 
     // the button behaves like a momentary switch: low while held, high on release
-    connect(irq_button, &QPushButton::pressed, this, [this]()
-            { emu_ptr->pull_irq_low(); });
+    connect(irq_button, &QPushButton::pressed, this, [this]() { emu_ptr->pull_irq_low(); });
 
-    connect(irq_button, &QPushButton::released, this, [this]()
-            { emu_ptr->release_irq(); });
+    connect(irq_button, &QPushButton::released, this, [this]() { emu_ptr->release_irq(); });
 
     QPushButton *nmi_button = new QPushButton("NMI", this);
     nmi_button->setFixedSize(QSize(50, 30));
     nmi_button->setToolTip("Hold to pull the CPU NMI line low");
 
-    connect(nmi_button, &QPushButton::pressed, this, [this]()
-            { emu_ptr->pull_nmi_low(); });
+    connect(nmi_button, &QPushButton::pressed, this, [this]() { emu_ptr->pull_nmi_low(); });
 
-    connect(nmi_button, &QPushButton::released, this, [this]()
-            { emu_ptr->release_nmi(); });
+    connect(nmi_button, &QPushButton::released, this, [this]() { emu_ptr->release_nmi(); });
 
     interrupt_groupBox_layout->setSpacing(6);
     interrupt_groupBox_layout->setContentsMargins(0, 10, 0, 10);
@@ -367,8 +354,7 @@ QGroupBox *DebuggerDialog::create_interrupt_group()
     return interrupt_groupBox;
 }
 
-QGroupBox *DebuggerDialog::create_io_group()
-{
+QGroupBox *DebuggerDialog::create_io_group() {
     QGroupBox *io_groupBox = new QGroupBox("I/O", this);
 
     QVBoxLayout *io_groupBox_layout = new QVBoxLayout(this);
@@ -388,8 +374,7 @@ QGroupBox *DebuggerDialog::create_io_group()
     return io_groupBox;
 }
 
-QGroupBox *DebuggerDialog::create_disassembly_group()
-{
+QGroupBox *DebuggerDialog::create_disassembly_group() {
     QGroupBox *disassembly_groupBox = new QGroupBox("Disassembly", this);
     disassembly_groupBox->setMinimumWidth(400);
 
@@ -403,30 +388,30 @@ QGroupBox *DebuggerDialog::create_disassembly_group()
 
     disassembly_groupBox->setLayout(disassembly_groupBox_layout_v);
 
-    connect(disassembly_selector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DebuggerDialog::select_disassembly_location);
+    connect(disassembly_selector, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &DebuggerDialog::select_disassembly_location);
 
     connect(disassembly_view, &DisassemblyView::onAddBreakpoint, this, &DebuggerDialog::add_breakpoint);
     connect(disassembly_view, &DisassemblyView::onRemoveBreakpoint, this, &DebuggerDialog::remove_breakpoint);
-    connect(disassembly_view, &DisassemblyView::onAddorRemoveBreakpoint, this, &DebuggerDialog::add_or_remove_breakpoint);
+    connect(disassembly_view, &DisassemblyView::onAddorRemoveBreakpoint, this,
+            &DebuggerDialog::add_or_remove_breakpoint);
     connect(disassembly_view, &DisassemblyView::onBreakpointChanged, this, &DebuggerDialog::populate_breakpoints_table);
-    connect(disassembly_view, &DisassemblyView::onAutorefreshChanged, this, [this](bool value)
-            {
+    connect(disassembly_view, &DisassemblyView::onAutorefreshChanged, this, [this](bool value) {
         toggle_autorefresh_disassembly_action->blockSignals(true);
         toggle_autorefresh_disassembly_action->setChecked(value);
-        toggle_autorefresh_disassembly_action->blockSignals(false); });
+        toggle_autorefresh_disassembly_action->blockSignals(false);
+    });
 
-    connect(disassembly_view, &DisassemblyView::onShowInMemory, this, [this](offs_t address)
-            {
-                if(selectMemoryDeviceByAddress(address))
-                {
-                    memory_view->goToAddress(address); 
-                } });
+    connect(disassembly_view, &DisassemblyView::onShowInMemory, this, [this](offs_t address) {
+        if (selectMemoryDeviceByAddress(address)) {
+            memory_view->goToAddress(address);
+        }
+    });
 
     return disassembly_groupBox;
 }
 
-QGroupBox *DebuggerDialog::create_memory_group()
-{
+QGroupBox *DebuggerDialog::create_memory_group() {
     QGroupBox *memory_groupBox = new QGroupBox("Memory", this);
     memory_groupBox->setMinimumWidth(360);
 
@@ -440,78 +425,71 @@ QGroupBox *DebuggerDialog::create_memory_group()
 
     memory_groupBox->setLayout(memory_groupBox_layout_v);
 
-    connect(memory_view, &MemoryView::on_heat_map_enabled_change, this, [this](bool enabled)
-            {
-                set_heat_map_off_action->blockSignals(true);
-                set_heat_map_fade_action->blockSignals(true);
-                set_heat_map_persist_action->blockSignals(true);
-    
-                set_heat_map_off_action->setChecked(!enabled);
-                set_heat_map_fade_action->setChecked(enabled);
-                set_heat_map_persist_action->setChecked(enabled);
+    connect(memory_view, &MemoryView::on_heat_map_enabled_change, this, [this](bool enabled) {
+        set_heat_map_off_action->blockSignals(true);
+        set_heat_map_fade_action->blockSignals(true);
+        set_heat_map_persist_action->blockSignals(true);
 
-                set_heat_map_off_action->blockSignals(false);
-                set_heat_map_fade_action->blockSignals(false);
-                set_heat_map_persist_action->blockSignals(false);
+        set_heat_map_off_action->setChecked(!enabled);
+        set_heat_map_fade_action->setChecked(enabled);
+        set_heat_map_persist_action->setChecked(enabled);
 
-                settings->showHeatMap = enabled;
-                save_settings(); });
+        set_heat_map_off_action->blockSignals(false);
+        set_heat_map_fade_action->blockSignals(false);
+        set_heat_map_persist_action->blockSignals(false);
 
-    connect(memory_view, &MemoryView::on_heat_map_change, this, [this](bool enabled, int decay)
-            {
-                set_heat_map_off_action->blockSignals(true);
-                set_heat_map_fade_action->blockSignals(true);
-                set_heat_map_persist_action->blockSignals(true);
+        settings->showHeatMap = enabled;
+        save_settings();
+    });
 
-                set_heat_map_off_action->setChecked(!enabled);
-                set_heat_map_fade_action->setChecked(enabled && (decay == FADE_SPEED));
-                set_heat_map_persist_action->setChecked(enabled && (decay == PERSIST_SPEED));
+    connect(memory_view, &MemoryView::on_heat_map_change, this, [this](bool enabled, int decay) {
+        set_heat_map_off_action->blockSignals(true);
+        set_heat_map_fade_action->blockSignals(true);
+        set_heat_map_persist_action->blockSignals(true);
 
-                set_heat_map_off_action->blockSignals(false);
-                set_heat_map_fade_action->blockSignals(false);
-                set_heat_map_persist_action->blockSignals(false);
+        set_heat_map_off_action->setChecked(!enabled);
+        set_heat_map_fade_action->setChecked(enabled && (decay == FADE_SPEED));
+        set_heat_map_persist_action->setChecked(enabled && (decay == PERSIST_SPEED));
 
-                settings->showHeatMap = enabled;
-                settings->heatMapDecay = decay;
+        set_heat_map_off_action->blockSignals(false);
+        set_heat_map_fade_action->blockSignals(false);
+        set_heat_map_persist_action->blockSignals(false);
 
-                save_settings(); });
+        settings->showHeatMap = enabled;
+        settings->heatMapDecay = decay;
 
-    connect(memory_view, &MemoryView::on_show_in_disassembly, this, [this](offs_t address)
-            {
-                if(selectDisassemblyDeviceByAddress(address))
-                {
-                    disassembly_view->setSelected(address); 
-                } });
+        save_settings();
+    });
 
-    connect(memory_selector, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &DebuggerDialog::select_memory_location);
+    connect(memory_view, &MemoryView::on_show_in_disassembly, this, [this](offs_t address) {
+        if (selectDisassemblyDeviceByAddress(address)) {
+            disassembly_view->setSelected(address);
+        }
+    });
 
-    connect(memory_view, &MemoryView::on_edit_abort, this, [this](int reason)
-            { QMessageBox::warning(this, "Edit Memory", get_error_message(reason)); });
+    connect(memory_selector, QOverload<int>::of(&QComboBox::currentIndexChanged), this,
+            &DebuggerDialog::select_memory_location);
+
+    connect(memory_view, &MemoryView::on_edit_abort, this, [this](int reason) {
+        QMessageBox::warning(this, "Edit Memory", get_error_message(reason));
+    });
 
     return memory_groupBox;
 }
 
-void DebuggerDialog::swap_views()
-{
-    if (memory_view->hasFocus())
-    {
+void DebuggerDialog::swap_views() {
+    if (memory_view->hasFocus()) {
         int address = memory_view->getSelectedAddress();
-        if (address > -1)
-        {
-            if (selectDisassemblyDeviceByAddress(address))
-            {
+        if (address > -1) {
+            if (selectDisassemblyDeviceByAddress(address)) {
                 disassembly_view->setSelected(address);
                 disassembly_view->setFocus();
             }
         }
-    }
-    else if (disassembly_view->hasFocus())
-    {
+    } else if (disassembly_view->hasFocus()) {
         int address = disassembly_view->getSelectedAddress();
-        if (address > -1)
-        {
-            if (selectMemoryDeviceByAddress(address))
-            {
+        if (address > -1) {
+            if (selectMemoryDeviceByAddress(address)) {
                 memory_view->goToAddress(address);
                 memory_view->setFocus();
             }
@@ -519,8 +497,7 @@ void DebuggerDialog::swap_views()
     }
 }
 
-void DebuggerDialog::goto_address(offs_t address)
-{
+void DebuggerDialog::goto_address(offs_t address) {
     memory_mapped_device *device = emu_ptr->get_block_device(address);
     if (!device)
         return;
@@ -528,8 +505,7 @@ void DebuggerDialog::goto_address(offs_t address)
     disassembly_view->setSelected(address);
 }
 
-void DebuggerDialog::setupUI()
-{
+void DebuggerDialog::setupUI() {
     QToolBar *toolbar = create_menu_toolbar();
     QToolBar *shortcut_toolbar = create_shortcuts_toolbar();
 

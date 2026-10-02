@@ -6,8 +6,7 @@
 #include "../util/log.h"
 
 DIPArray::DIPArray(QWidget *parent)
-    : QWidget(parent)
-{
+    : QWidget(parent) {
     dip[0].load(":/images/dip_off.png");
     dip[1].load(":/images/dip_on.png");
 
@@ -21,33 +20,29 @@ DIPArray::DIPArray(QWidget *parent)
     // connect(this->m_paintTimer, SIGNAL(timeout()), this, SLOT(redraw()));
 
 
-
     action = new QAction;
     connect(action, &QAction::triggered, this, &DIPArray::redraw);
 
     this->setFixedSize(QSize(128, 32));
 }
 
-DIPArray::~DIPArray()
-{
+DIPArray::~DIPArray() {
     delete (action);
 }
 
-void DIPArray::paintEvent(QPaintEvent * /* event */)
-{
+void DIPArray::paintEvent(QPaintEvent * /* event */) {
     QPainter painter(this);
 
     // painter.setBrush(QBrush(Qt::transparent));
 
     // painter.fillRect(this->rect(), painter.brush());
 
-	painter.setFont(m_font);
+    painter.setFont(m_font);
     painter.setPen(Qt::black);
 
     painter.save();
 
-    for (int bit = 0; bit <= 7; bit++)
-    {
+    for (int bit = 0; bit <= 7; bit++) {
         int pos = 7 - bit;
         uint8_t state = (byte >> bit) & 1;
 
@@ -65,18 +60,15 @@ void DIPArray::paintEvent(QPaintEvent * /* event */)
     painter.end();
 }
 
-void DIPArray::redraw()
-{
+void DIPArray::redraw() {
     this->update();
 }
 
-void DIPArray::update_display()
-{
+void DIPArray::update_display() {
     action->trigger();
 }
 
-void DIPArray::set_device(io_device *device)
-{
+void DIPArray::set_device(io_device *device) {
     this->device = device;
 
     if (device == nullptr)
@@ -87,8 +79,7 @@ void DIPArray::set_device(io_device *device)
 }
 
 
-void DIPArray::mousePressEvent(QMouseEvent *event)
-{
+void DIPArray::mousePressEvent(QMouseEvent *event) {
     if (device == nullptr)
         return;
 
@@ -99,12 +90,9 @@ void DIPArray::mousePressEvent(QMouseEvent *event)
 
     uint8_t state = (byte >> bit) & 1;
 
-    if (state == 1)
-    {
+    if (state == 1) {
         byte = byte & ~(1 << bit);
-    }
-    else
-    {
+    } else {
         byte = byte | (1 << bit);
     }
 

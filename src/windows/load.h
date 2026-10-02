@@ -18,22 +18,21 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-struct LoadSettings
-{
+struct LoadSettings {
     QString device_name;
     offs_t start;
     offs_t end;
     bool auto_detect_start;
 };
 
-class LoadDialog : public QDialog
-{
+class LoadDialog : public QDialog {
     Q_OBJECT
 
 public:
     LoadDialog();
 
     void setSettings(LoadSettings settings);
+
     LoadSettings getSettings();
 
 private:
@@ -53,7 +52,9 @@ private:
     QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *Dialog);
+
     void retranslateUi(QDialog *Dialog);
+
     void validate();
 };
 

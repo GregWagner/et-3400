@@ -17,22 +17,22 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-struct BreakpointInfo
-{
+struct BreakpointInfo {
     offs_t address;
 };
 
-class BreakpointDialog : public QDialog
-{
+class BreakpointDialog : public QDialog {
     Q_OBJECT
 
 public:
     BreakpointDialog();
 
     void addBreakpoint(offs_t address);
+
     void editBreakpoint(Breakpoint *breakpoint);
 
     BreakpointInfo getBreakpoint();
+
     // std::function<bool(Breakpoint *label, offs_t start)> hasCollision;
 
 private:
@@ -48,7 +48,9 @@ private:
     Breakpoint *ref_breakpoint;
 
     void setupUi(QDialog *Dialog);
+
     void retranslateUi(QDialog *Dialog);
+
     void validate();
 };
 

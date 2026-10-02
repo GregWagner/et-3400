@@ -1,16 +1,15 @@
 #include "clear_ram.h"
 #include "../common/util.h"
 
-ClearRamDialog::ClearRamDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+ClearRamDialog::ClearRamDialog() : QDialog(
+    0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
 
     setFixedSize(QSize(350, 250));
     setWindowTitle("Clear RAM");
 }
 
-void ClearRamDialog::setupUi(QDialog *Dialog)
-{
+void ClearRamDialog::setupUi(QDialog *Dialog) {
     mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(10);
     mainLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
@@ -103,33 +102,28 @@ void ClearRamDialog::setupUi(QDialog *Dialog)
     connect(buttonBox, &QDialogButtonBox::rejected, this, &ClearRamDialog::reject);
 
     QMetaObject::connectSlotsByName(Dialog);
-
 } // setupUi
 
-void ClearRamDialog::retranslateUi(QDialog *Dialog)
-{
+void ClearRamDialog::retranslateUi(QDialog *Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
     start_label->setText(QApplication::translate("Dialog", "Start", nullptr));
     end_label->setText(QApplication::translate("Dialog", "End", nullptr));
     value_label->setText(QApplication::translate("Dialog", "Value", nullptr));
     description_label->setText(QApplication::translate("Dialog", "Select range of RAM to clear", nullptr));
-
 } // retranslateUi
 
-void ClearRamDialog::setSettings(ClearRamSettings settings)
-{
+void ClearRamDialog::setSettings(ClearRamSettings settings) {
     // text_edit->setText(settings.header);
     start_edit->setText(toHex(settings.start));
     end_edit->setText(toHex(settings.end));
     value_edit->setText(toHex(settings.value, 2));
 }
 
-void ClearRamDialog::validate()
-{
+void ClearRamDialog::validate() {
     bool ok1, ok2, ok3;
 
     int start = toInt(start_edit, ok1);
-    int end   = toInt(end_edit, ok2);
+    int end = toInt(end_edit, ok2);
     toInt(value_edit, ok3);
 
     QStringList errors;
@@ -138,24 +132,20 @@ void ClearRamDialog::validate()
     if (!ok3) errors << "Invalid value.";
     if (ok1 && ok2 && start >= end) errors << "Start must be less than end.";
 
-    if (errors.isEmpty())
-    {
+    if (errors.isEmpty()) {
         error_label->hide();
         accept();
-    }
-    else
-    {
+    } else {
         error_label->setText(errors.join(" "));
         error_label->show();
     }
 }
 
-ClearRamSettings ClearRamDialog::getSettings()
-{
+ClearRamSettings ClearRamDialog::getSettings() {
     bool ok;
     return ClearRamSettings{
-        (offs_t)toInt(start_edit, ok),
-        (offs_t)toInt(end_edit, ok),
-        (uint8_t)toInt(value_edit, ok),
+        (offs_t) toInt(start_edit, ok),
+        (offs_t) toInt(end_edit, ok),
+        (uint8_t) toInt(value_edit, ok),
     };
 }

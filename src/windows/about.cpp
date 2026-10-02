@@ -1,8 +1,7 @@
 #include "about.h"
 #include "../common/util.h"
 
-AboutDialog::AboutDialog(): QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+AboutDialog::AboutDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     QWidget *mainwidget = new QWidget;
     QVBoxLayout *textLayout = new QVBoxLayout(mainwidget);
     QLabel *link = new QLabel;

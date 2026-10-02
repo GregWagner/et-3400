@@ -17,16 +17,14 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-struct LabelInfo
-{
+struct LabelInfo {
     QString text;
     LabelType type;
     offs_t start;
     offs_t end;
 };
 
-class LabelDialog : public QDialog
-{
+class LabelDialog : public QDialog {
     Q_OBJECT
 
 public:
@@ -34,10 +32,12 @@ public:
 
     // void setLabel(LabelInfo label, LabelDialogMode mode);
     void addLabel(QString text, offs_t address);
+
     void editLabel(Label *label);
 
     LabelInfo getLabel();
-    std::function<bool(Label *label, offs_t start, offs_t end)> hasCollision;
+
+    std::function<bool(Label * label, offs_t start, offs_t end)> hasCollision;
 
 private:
     QVBoxLayout *mainLayout;
@@ -59,9 +59,13 @@ private:
     Label *ref_label;
 
     void setupUi(QDialog *Dialog);
+
     void set_comment(bool checked = false);
+
     void set_data(bool checked = false);
+
     void retranslateUi(QDialog *Dialog);
+
     void validate();
 };
 

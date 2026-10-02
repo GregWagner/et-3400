@@ -10,8 +10,7 @@
 #include <QWidget>
 #include <QPushButton>
 
-class RemoveLabelDialog : public QDialog
-{
+class RemoveLabelDialog : public QDialog {
     Q_OBJECT
 
 public:
@@ -25,6 +24,7 @@ public:
 
 private:
     void setupUi(QDialog *Dialog);
+
     void retranslateUi(QDialog *Dialog);
 };
 

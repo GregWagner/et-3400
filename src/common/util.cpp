@@ -7,66 +7,53 @@
 #include "../util/log.h"
 #include "version.h"
 
-QString getVersion()
-{
+QString getVersion() {
     QString version;
 
-    if (VERSION_PATCH > 0)
-    {
+    if (VERSION_PATCH > 0) {
         version = QString("%1.%2.%3").arg(VERSION_MAJOR).arg(VERSION_MINOR, 2, 10, QChar('0')).arg(VERSION_PATCH);
-    }
-    else
-    {
+    } else {
         version = QString("%1.%2").arg(VERSION_MAJOR).arg(VERSION_MINOR, 2, 10, QChar('0'));
     }
 
     QString prerelease = QString(VERSION_PRERELEASE);
 
-    if (!prerelease.isEmpty())
-    {
+    if (!prerelease.isEmpty()) {
         version.append("-").append(prerelease);
     }
 
     return version;
 }
 
-QString toHex(int value, int width)
-{
+QString toHex(int value, int width) {
     return QString("$%1").arg(value, width, 16, QChar('0')).toUpper();
 }
 
-QString toBin(int value, int width)
-{
+QString toBin(int value, int width) {
     return QString("%1").arg(value, width, 2, QChar('0')).toUpper();
 }
 
 
-int toInt(QLineEdit *edit, bool &ok)
-{
+int toInt(QLineEdit *edit, bool &ok) {
     QString text = edit->text();
 
-    if (!text.startsWith("$"))
-    {
+    if (!text.startsWith("$")) {
         text = QString("$").append(text);
     }
 
     return text.replace("$", "0x").toInt(&ok, 0);
 }
 
-char *load_bin(QString path, size_t &size, bool &success)
-{
+char *load_bin(QString path, size_t &size, bool &success) {
     char *buffer = nullptr;
 
     QFile file(path);
-    if (!file.open(QIODevice::ReadOnly))
-    {
+    if (!file.open(QIODevice::ReadOnly)) {
         success = false;
         // throw -10010;
-    }
-    else
-    {
+    } else {
         size = file.size();
-        buffer = (char *)malloc(size);
+        buffer = (char *) malloc(size);
         file.read(buffer, size);
     }
     success = true;
@@ -74,22 +61,19 @@ char *load_bin(QString path, size_t &size, bool &success)
     return buffer;
 }
 
-char *load_srec(QString path, size_t &size, bool &success)
-{
+char *load_srec(QString path, size_t &size, bool &success) {
     char *buffer = nullptr;
 
     std::vector<data_block> *blocks = new std::vector<data_block>;
 
     LOG_DEBUG << "Loading SREC";
 
-    if (SrecFile::Read(path, blocks))
-    {
+    if (SrecFile::Read(path, blocks)) {
         uint16_t lowest_address = 0xFFFF;
         uint16_t highest_address = 0x0000;
 
         // determine bounds
-        for (std::vector<data_block>::iterator it = blocks->begin(); it != blocks->end(); ++it)
-        {
+        for (std::vector<data_block>::iterator it = blocks->begin(); it != blocks->end(); ++it) {
             uint16_t end = (it->address + it->length - 1);
 
             LOG_DEBUG << " start: " << it->address;
@@ -105,19 +89,17 @@ char *load_srec(QString path, size_t &size, bool &success)
         LOG_DEBUG << " lowest_address: " << lowest_address;
         LOG_DEBUG << " size: " << size;
 
-        buffer = (char *)malloc(size);
+        buffer = (char *) malloc(size);
 
         // copy blocks to buffer
-        for (std::vector<data_block>::iterator it = blocks->begin(); it != blocks->end(); ++it)
-        {
+        for (std::vector<data_block>::iterator it = blocks->begin(); it != blocks->end(); ++it) {
             uint16_t offset = it->address - lowest_address;
             memcpy(&buffer[offset], it->data, it->length);
         }
     }
 
     // clean up
-    for (std::vector<data_block>::iterator it = blocks->begin(); it != blocks->end(); ++it)
-    {
+    for (std::vector<data_block>::iterator it = blocks->begin(); it != blocks->end(); ++it) {
         free(it->data);
     }
 
@@ -126,21 +108,16 @@ char *load_srec(QString path, size_t &size, bool &success)
     return buffer;
 }
 
-char *load_file(QString path, size_t &size, bool &success)
-{
+char *load_file(QString path, size_t &size, bool &success) {
     char *buffer = nullptr;
 
-    if (is_srec(path))
-    {
+    if (is_srec(path)) {
         buffer = load_srec(path, size, success);
-    }
-    else
-    {
+    } else {
         buffer = load_bin(path, size, success);
     }
 
-    if (success)
-    {
+    if (success) {
         LOG_DEBUG << "Loaded " << size << " bytes from " << path;
     }
 

@@ -18,28 +18,27 @@
 #include <QWidget>
 #include "../dev/memory_map.h"
 
-enum DeviceDialogMode
-{
+enum DeviceDialogMode {
     AddDevice,
     EditDevice
 };
 
-struct DeviceInfo
-{
+struct DeviceInfo {
     QString name;
     BitPattern bit_pattern;
 };
 
-class DeviceDialog : public QDialog
-{
+class DeviceDialog : public QDialog {
     Q_OBJECT
 
 public:
     DeviceDialog();
 
     void setDeviceInfo(DeviceInfo label, DeviceDialogMode mode);
+
     DeviceInfo getDeviceInfo();
-	std::function<bool(offs_t, offs_t)> has_collision;
+
+    std::function<bool(offs_t, offs_t)> has_collision;
 
 private:
     QVBoxLayout *mainLayout;
@@ -60,9 +59,13 @@ private:
     QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *Dialog);
+
     void set_comment(bool checked = false);
+
     void set_data(bool checked = false);
+
     void retranslateUi(QDialog *Dialog);
+
     void validate();
 };
 

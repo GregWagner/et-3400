@@ -2,14 +2,14 @@
 #include <QDebug>
 #include <string>
 
-class Logger
-{
+class Logger {
 public:
     enum Level { Error = 0, Warn = 1, Info = 2, Debug = 3 };
 
     static void setLevel(Level level) { s_level = level; }
     static Level level() { return s_level; }
-    static void setLevelFromString(const std::string& s);
+
+    static void setLevelFromString(const std::string &s);
 
 private:
     static Level s_level;

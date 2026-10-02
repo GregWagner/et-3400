@@ -26,171 +26,209 @@
 #include <QColor>
 #include <QShortcut>
 
-class DisassemblyView : public QFrame
-{
-	Q_OBJECT
+class DisassemblyView : public QFrame {
+    Q_OBJECT
 
 public:
-	int offset;
+    int offset;
 
-	DisassemblyView();
-	DisassemblyView(QWidget *parent);
-	~DisassemblyView();
-	void scroll(int steps);
-	void scrollTo(int value);
-	void scrollIntoView();
-	void setEmulator(et3400emu *emu);
-	void set_range(offs_t start, offs_t end, uint8_t *memory);
-	void setCurrent(offs_t address);
-	void setSelected(offs_t address);
-	int getSelectedAddress();
+    DisassemblyView();
 
-	void clearCurrent();
-	void clearSelected();
+    DisassemblyView(QWidget *parent);
 
-	void refresh();
-	void rebuild();
-	void clearLabels();
-	void addLabel();
-	void ensureVisible(offs_t address);
-	void setAutoRefresh(bool value);
+    ~DisassemblyView();
 
-signals:
-	void onScroll(int steps);
-	void onOffsetUpdated(int offset);
-	void onSize(int max);
-	void onAddBreakpoint(offs_t address);
-	void onRemoveBreakpoint(offs_t address);
-	void onAddorRemoveBreakpoint(offs_t address);
-	void onBreakpointChanged();
-	void onAutorefreshChanged(bool value);
-	void onShowInMemory(offs_t address);
+    void scroll(int steps);
 
-public slots:
-	void redraw();
+    void scrollTo(int value);
+
+    void scrollIntoView();
+
+    void setEmulator(et3400emu *emu);
+
+    void set_range(offs_t start, offs_t end, uint8_t *memory);
+
+    void setCurrent(offs_t address);
+
+    void setSelected(offs_t address);
+
+    int getSelectedAddress();
+
+    void clearCurrent();
+
+    void clearSelected();
+
+    void refresh();
+
+    void rebuild();
+
+    void clearLabels();
+
+    void addLabel();
+
+    void ensureVisible(offs_t address);
+
+    void setAutoRefresh(bool value);
+
+    signals:
+
+
+    void onScroll(int steps);
+
+    void onOffsetUpdated(int offset);
+
+    void onSize(int max);
+
+    void onAddBreakpoint(offs_t address);
+
+    void onRemoveBreakpoint(offs_t address);
+
+    void onAddorRemoveBreakpoint(offs_t address);
+
+    void onBreakpointChanged();
+
+    void onAutorefreshChanged(bool value);
+
+    void onShowInMemory(offs_t address);
+
+public
+    slots:
+
+
+    void redraw();
 
 protected:
-	void paintEvent(QPaintEvent *event) override;
-	bool eventFilter(QObject *obj, QEvent *event) override;
-	void wheelEvent(QWheelEvent *event) override;
-	void resizeEvent(QResizeEvent *event) override;
-	void mousePressEvent(QMouseEvent *event) override;
-	void mouseMoveEvent(QMouseEvent *event) override;
-	void leaveEvent(QEvent *event) override;
-	void keyPressEvent(QKeyEvent *event) override;
-	void focusInEvent(QFocusEvent *event) override;
-	void focusOutEvent(QFocusEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
+
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
+    void wheelEvent(QWheelEvent *event) override;
+
+    void resizeEvent(QResizeEvent *event) override;
+
+    void mousePressEvent(QMouseEvent *event) override;
+
+    void mouseMoveEvent(QMouseEvent *event) override;
+
+    void leaveEvent(QEvent *event) override;
+
+    void keyPressEvent(QKeyEvent *event) override;
+
+    void focusInEvent(QFocusEvent *event) override;
+
+    void focusOutEvent(QFocusEvent *event) override;
 
 private:
-	QScrollBar *scrollbar = nullptr;
-	QFrame *frame;
+    QScrollBar *scrollbar = nullptr;
+    QFrame *frame;
 
-	QAction *action;
-	QPixmap *buffer;
-	QPixmap breakpoint_enabled_icon;
-	QPixmap breakpoint_disabled_icon;
-	QPixmap breakpoint_available_icon;
-	QTimer *m_paintTimer;
+    QAction *action;
+    QPixmap *buffer;
+    QPixmap breakpoint_enabled_icon;
+    QPixmap breakpoint_disabled_icon;
+    QPixmap breakpoint_available_icon;
+    QTimer *m_paintTimer;
 
-	et3400emu *emu_ptr = nullptr;
-	uint8_t *memory;
+    et3400emu *emu_ptr = nullptr;
+    uint8_t *memory;
 
-	std::vector<DisassemblyLine> *lines;
+    std::vector<DisassemblyLine> *lines;
 
-	bool running;
-	bool is_memory_set;
-	offs_t start;
-	offs_t end;
-	int visible_items;
-	int item_height = 20;
-	int max_vscroll;
-	int selected_line;
-	int last_selected_line = -1;
+    bool running;
+    bool is_memory_set;
+    offs_t start;
+    offs_t end;
+    int visible_items;
+    int item_height = 20;
+    int max_vscroll;
+    int selected_line;
+    int last_selected_line = -1;
 
-	int current;
-	int hover_row = -1;
-	bool auto_refresh = false;
-	bool gained_focus = false;
+    int current;
+    int hover_row = -1;
+    bool auto_refresh = false;
+    bool gained_focus = false;
 
-	DisassemblyLine findLine(offs_t address);
-	void addOrRemoveBreakpoint(int line_number);
+    DisassemblyLine findLine(offs_t address);
 
-	void bufferDraw();
-	void showContextMenu(const QPoint &pos);
-	void adjustSelected(int direction);
+    void addOrRemoveBreakpoint(int line_number);
 
-	void addLabel(DisassemblyLine *line);
-	void editLabel(DisassemblyLine *line);
-	void removeLabel(DisassemblyLine *line);
+    void bufferDraw();
 
-	void setupUI(QWidget *parent)
-	{
-		this->setFocusPolicy(Qt::StrongFocus);
+    void showContextMenu(const QPoint &pos);
 
-		QHBoxLayout *layout = new QHBoxLayout(parent);
+    void adjustSelected(int direction);
 
-		frame = new QFrame(parent);
-		frame->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-		frame->setLineWidth(3);
-		frame->setMouseTracking(true);
-		frame->setContextMenuPolicy(Qt::CustomContextMenu);
-		frame->installEventFilter(this);
+    void addLabel(DisassemblyLine *line);
 
-		scrollbar = new QScrollBar(Qt::Orientation::Vertical);
+    void editLabel(DisassemblyLine *line);
 
-		layout->addWidget(frame);
-		layout->addWidget(scrollbar);
-		layout->setContentsMargins(0, 0, 0, 0);
+    void removeLabel(DisassemblyLine *line);
 
-		this->setLayout(layout);
+    void setupUI(QWidget *parent) {
+        this->setFocusPolicy(Qt::StrongFocus);
 
-		connect(scrollbar, &QScrollBar::sliderMoved, this, &DisassemblyView::scrollTo);
-		connect(scrollbar, &QScrollBar::valueChanged, this, &DisassemblyView::scrollTo);
-		connect(frame, &QFrame::customContextMenuRequested, this, &DisassemblyView::showContextMenu);
+        QHBoxLayout *layout = new QHBoxLayout(parent);
 
-		QShortcut *toggleBreakpointEnableShortcut = new QShortcut(QKeySequence("Ctrl+F9"), this);
-		connect(toggleBreakpointEnableShortcut, &QShortcut::activated, this, [this]()
-				{ 
-			if (selected_line > -1)
-			{
-				DisassemblyLine *line = &lines->at(selected_line);
-				Breakpoint breakpoint;
+        frame = new QFrame(parent);
+        frame->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
+        frame->setLineWidth(3);
+        frame->setMouseTracking(true);
+        frame->setContextMenuPolicy(Qt::CustomContextMenu);
+        frame->installEventFilter(this);
 
-				if (emu_ptr->breakpoints->tryGetBreakpoint(line->address, breakpoint))
-					{
-						if (breakpoint.is_enabled)
-						{
-							emu_ptr->breakpoints->disableBreakpoint(line->address); redraw(); emit onBreakpointChanged(); 
-						}
-						else
-						{
-							emu_ptr->breakpoints->enableBreakpoint(line->address); redraw(); emit onBreakpointChanged(); 
-						}
-					}
-			} });
+        scrollbar = new QScrollBar(Qt::Orientation::Vertical);
 
-		QShortcut *addLabelshortcut = new QShortcut(QKeySequence(Qt::Key_Insert), this);
-		connect(addLabelshortcut, &QShortcut::activated, this, [this]()
-				{ 
-			if (selected_line > -1)
-			{
-				DisassemblyLine *line = &lines->at(selected_line);
-				if(line->label == nullptr){
-					DisassemblyView::addLabel(line);
-				}
-			} });
+        layout->addWidget(frame);
+        layout->addWidget(scrollbar);
+        layout->setContentsMargins(0, 0, 0, 0);
 
-		QShortcut *removeLabelShortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
-		connect(removeLabelShortcut, &QShortcut::activated, this, [this]()
-				{
-			if (selected_line > -1)
-			{
-				DisassemblyLine *line = &lines->at(selected_line);
-				if(line->label != nullptr){
-					DisassemblyView::removeLabel(line);
-				}
-			} });
-	}
+        this->setLayout(layout);
+
+        connect(scrollbar, &QScrollBar::sliderMoved, this, &DisassemblyView::scrollTo);
+        connect(scrollbar, &QScrollBar::valueChanged, this, &DisassemblyView::scrollTo);
+        connect(frame, &QFrame::customContextMenuRequested, this, &DisassemblyView::showContextMenu);
+
+        QShortcut *toggleBreakpointEnableShortcut = new QShortcut(QKeySequence("Ctrl+F9"), this);
+        connect(toggleBreakpointEnableShortcut, &QShortcut::activated, this, [this]() {
+            if (selected_line > -1) {
+                DisassemblyLine *line = &lines->at(selected_line);
+                Breakpoint breakpoint;
+
+                if (emu_ptr->breakpoints->tryGetBreakpoint(line->address, breakpoint)) {
+                    if (breakpoint.is_enabled) {
+                        emu_ptr->breakpoints->disableBreakpoint(line->address);
+                        redraw();
+                        emit onBreakpointChanged();
+                    } else {
+                        emu_ptr->breakpoints->enableBreakpoint(line->address);
+                        redraw();
+                        emit onBreakpointChanged();
+                    }
+                }
+            }
+        });
+
+        QShortcut *addLabelshortcut = new QShortcut(QKeySequence(Qt::Key_Insert), this);
+        connect(addLabelshortcut, &QShortcut::activated, this, [this]() {
+            if (selected_line > -1) {
+                DisassemblyLine *line = &lines->at(selected_line);
+                if (line->label == nullptr) {
+                    DisassemblyView::addLabel(line);
+                }
+            }
+        });
+
+        QShortcut *removeLabelShortcut = new QShortcut(QKeySequence(Qt::Key_Delete), this);
+        connect(removeLabelShortcut, &QShortcut::activated, this, [this]() {
+            if (selected_line > -1) {
+                DisassemblyLine *line = &lines->at(selected_line);
+                if (line->label != nullptr) {
+                    DisassemblyView::removeLabel(line);
+                }
+            }
+        });
+    }
 };
 
 #endif // DISASSEMBLYVIEW_H

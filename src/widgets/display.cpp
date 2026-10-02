@@ -6,8 +6,7 @@
 #include "../util/log.h"
 
 DisplayWidget::DisplayWidget(QWidget *parent)
-    : QWidget(parent)
-{
+    : QWidget(parent) {
     hr[0].load(":/images/hr_off.png");
     hr[1].load(":/images/hr_on.png");
     vt[0].load(":/images/vt_off.png");
@@ -23,8 +22,7 @@ DisplayWidget::DisplayWidget(QWidget *parent)
     // m_paintTimer->start(17); // 17ms, or every 1/60th of a second
     // connect(this->m_paintTimer, SIGNAL(timeout()), this, SLOT(redraw()));
     device = new display_io;
-    device->write_hook = [this](offs_t addr, uint8_t data)
-    {
+    device->write_hook = [this](offs_t addr, uint8_t data) {
         addr = addr - 0xC100;
         addr = addr & 0b01110111;
 
@@ -32,12 +30,9 @@ DisplayWidget::DisplayWidget(QWidget *parent)
         int seg = addr & 0x7;
         uint8_t state = data & 1;
 
-        if (state == 1)
-        {
+        if (state == 1) {
             segment[position] |= (1 << seg);
-        }
-        else
-        {
+        } else {
             segment[position] &= ~(1 << seg);
         }
     };
@@ -55,13 +50,11 @@ DisplayWidget::DisplayWidget(QWidget *parent)
     this->setFixedSize(QSize(320, 85));
 }
 
-DisplayWidget::~DisplayWidget()
-{
+DisplayWidget::~DisplayWidget() {
     delete (action);
 }
 
-void DisplayWidget::paintEvent(QPaintEvent * /* event */)
-{
+void DisplayWidget::paintEvent(QPaintEvent * /* event */) {
     QPainter painter(this);
     QString letters[] = {"H", "I", "N", "Z", "V", "C"};
     // Clear display
@@ -74,42 +67,39 @@ void DisplayWidget::paintEvent(QPaintEvent * /* event */)
     painter.save();
 
     // Go over each position
-    for (int pos = 0; pos < 6; pos++)
-    {
+    for (int pos = 0; pos < 6; pos++) {
         // Go over each segment
-        for (int seg = 0; seg <= 7; seg++)
-        {
+        for (int seg = 0; seg <= 7; seg++) {
             uint8_t state = (segment[pos] >> seg) & 1;
 
             painter.save();
             painter.translate(20 + pos * 45, 10);
 
-            switch (seg)
-            {
-            case 0:
-                painter.drawPixmap(11, 23, hr[state]);
-                break;
-            case 1:
-                painter.drawPixmap(5, 11, vt[state]);
-                break;
-            case 2:
-                painter.drawPixmap(4, 27, vt[state]);
-                break;
-            case 3:
-                painter.drawPixmap(8, 42, hr[state]);
-                break;
-            case 4:
-                painter.drawPixmap(25, 27, vt[state]);
-                break;
-            case 5:
-                painter.drawPixmap(26, 11, vt[state]);
-                break;
-            case 6:
-                painter.drawPixmap(11, 5, hr[state]);
-                break;
-            case 7:
-                painter.drawPixmap(31, 42, dp[state]);
-                break;
+            switch (seg) {
+                case 0:
+                    painter.drawPixmap(11, 23, hr[state]);
+                    break;
+                case 1:
+                    painter.drawPixmap(5, 11, vt[state]);
+                    break;
+                case 2:
+                    painter.drawPixmap(4, 27, vt[state]);
+                    break;
+                case 3:
+                    painter.drawPixmap(8, 42, hr[state]);
+                    break;
+                case 4:
+                    painter.drawPixmap(25, 27, vt[state]);
+                    break;
+                case 5:
+                    painter.drawPixmap(26, 11, vt[state]);
+                    break;
+                case 6:
+                    painter.drawPixmap(11, 5, hr[state]);
+                    break;
+                case 7:
+                    painter.drawPixmap(31, 42, dp[state]);
+                    break;
             }
             painter.restore();
 
@@ -125,17 +115,14 @@ void DisplayWidget::paintEvent(QPaintEvent * /* event */)
     painter.end();
 }
 
-void DisplayWidget::redraw()
-{
+void DisplayWidget::redraw() {
     this->update();
 }
 
-void DisplayWidget::update_display()
-{
+void DisplayWidget::update_display() {
     action->trigger();
 }
 
-void DisplayWidget::set_settings(Settings *settings)
-{
+void DisplayWidget::set_settings(Settings *settings) {
     device->set_settings(settings);
 }

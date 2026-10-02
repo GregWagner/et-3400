@@ -6,8 +6,7 @@
 #include "../util/log.h"
 
 LEDArray::LEDArray(QWidget *parent)
-    : QWidget(parent)
-{
+    : QWidget(parent) {
     led[0].load(":/images/led_off.png");
     led[1].load(":/images/led_on.png");
 
@@ -25,13 +24,11 @@ LEDArray::LEDArray(QWidget *parent)
     this->setFixedSize(QSize(128, 16));
 }
 
-LEDArray::~LEDArray()
-{
+LEDArray::~LEDArray() {
     delete action;
 }
 
-void LEDArray::paintEvent(QPaintEvent * /* event */)
-{
+void LEDArray::paintEvent(QPaintEvent * /* event */) {
     QPainter painter(this);
 
     // painter.setBrush(QBrush(Qt::transparent));
@@ -42,8 +39,7 @@ void LEDArray::paintEvent(QPaintEvent * /* event */)
 
     painter.save();
 
-    for (int bit = 0; bit <= 7; bit++)
-    {
+    for (int bit = 0; bit <= 7; bit++) {
         uint8_t state = (byte >> bit) & 1;
 
         painter.save();
@@ -59,15 +55,13 @@ void LEDArray::paintEvent(QPaintEvent * /* event */)
     painter.end();
 }
 
-void LEDArray::set_device(io_device *device)
-{
+void LEDArray::set_device(io_device *device) {
     this->device = device;
 
     if (device == nullptr)
         return;
 
-    device->write_hook = [this](offs_t addr, uint8_t data)
-    {
+    device->write_hook = [this](offs_t addr, uint8_t data) {
         byte = data;
     };
 
@@ -75,12 +69,10 @@ void LEDArray::set_device(io_device *device)
     device->write_direct(0, byte);
 }
 
-void LEDArray::redraw()
-{
+void LEDArray::redraw() {
     this->update();
 }
 
-void LEDArray::update_display()
-{
+void LEDArray::update_display() {
     action->trigger();
 }

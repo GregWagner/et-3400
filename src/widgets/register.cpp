@@ -2,8 +2,7 @@
 #include <QApplication>
 #include "colors.h"
 
-RegisterView::RegisterView(RegisterType type, QWidget *parent) : QFrame(parent)
-{
+RegisterView::RegisterView(RegisterType type, QWidget *parent) : QFrame(parent) {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setLineWidth(3);
     setFocusPolicy(Qt::StrongFocus);
@@ -16,13 +15,12 @@ RegisterView::RegisterView(RegisterType type, QWidget *parent) : QFrame(parent)
 
     blink_timer = new QTimer(this);
 
-    connect(blink_timer, &QTimer::timeout, [this]()
-            {
-                if (is_editing)
-                {
-                    blink_state = (blink_state + 1) % 2;
-                    update();
-                } });
+    connect(blink_timer, &QTimer::timeout, [this]() {
+        if (is_editing) {
+            blink_state = (blink_state + 1) % 2;
+            update();
+        }
+    });
 
     setContextMenuPolicy(Qt::CustomContextMenu);
     connect(this, &QFrame::customContextMenuRequested, this, &RegisterView::showContextMenu);
@@ -30,21 +28,18 @@ RegisterView::RegisterView(RegisterType type, QWidget *parent) : QFrame(parent)
     buffer = new QPixmap;
 }
 
-RegisterView::~RegisterView()
-{
+RegisterView::~RegisterView() {
     delete m_fm;
     delete buffer;
     delete blink_timer;
 }
 
-void RegisterView::set_value(uint16_t value)
-{
+void RegisterView::set_value(uint16_t value) {
     this->value = value;
     update();
 }
 
-void RegisterView::paintEvent(QPaintEvent *event)
-{
+void RegisterView::paintEvent(QPaintEvent *event) {
     QPainter painter(this);
     bufferDraw();
     painter.drawPixmap(0, 0, *buffer, 0, 0, 0, 0);
@@ -52,17 +47,13 @@ void RegisterView::paintEvent(QPaintEvent *event)
     QFrame::paintEvent(event);
 }
 
-void RegisterView::bufferDraw()
-{
+void RegisterView::bufferDraw() {
     if (buffer->size() != size())
         *buffer = QPixmap(size());
 
-    if (is_selected && !is_editing)
-    {
+    if (is_selected && !is_editing) {
         buffer->fill(selected_bg_color);
-    }
-    else
-    {
+    } else {
         buffer->fill(Qt::white);
     }
 
@@ -74,31 +65,22 @@ void RegisterView::bufferDraw()
 
     uint16_t value = is_editing ? editing_value : this->value;
 
-    if (m_type == WORD)
-    {
+    if (m_type == WORD) {
         text = QString("%1").arg(value, 4, 16, QChar('0')).toUpper();
-    }
-    else if (m_type == BYTE)
-    {
+    } else if (m_type == BYTE) {
         text = QString("%1").arg(value, 2, 16, QChar('0')).toUpper();
-    }
-    else if (m_type == FLAGS)
-    {
-        text = QString("11%1%2%3%4%5%6").arg(value >> 5 & 1).arg(value >> 4 & 1).arg(value >> 3 & 1).arg(value >> 2 & 1).arg(value >> 1 & 1).arg(value >> 0 & 1);
+    } else if (m_type == FLAGS) {
+        text = QString("11%1%2%3%4%5%6").arg(value >> 5 & 1).arg(value >> 4 & 1).arg(value >> 3 & 1).arg(value >> 2 & 1)
+                .arg(value >> 1 & 1).arg(value >> 0 & 1);
     }
 
-    if (is_editing && blink_state == 1)
+    if (is_editing &&blink_state == 1)
     {
-        if (m_type == WORD)
-        {
+        if (m_type == WORD) {
             text[editing_nibble] = ' ';
-        }
-        else if (m_type == BYTE)
-        {
+        } else if (m_type == BYTE) {
             text[editing_nibble] = ' ';
-        }
-        else if (m_type == FLAGS)
-        {
+        } else if (m_type == FLAGS) {
             text[2 + editing_nibble] = ' ';
         }
     }
@@ -108,80 +90,55 @@ void RegisterView::bufferDraw()
     int x = 5;
     int y = (height() + m_fm->ascent() - m_fm->descent()) / 2;
 
-    if (is_selected && !is_editing)
-    {
+    if (is_selected && !is_editing) {
         painter.setPen(selected_fg_color);
-    }
-    else if (is_editing)
-    {
+    } else if (is_editing) {
         painter.setPen(Qt::blue);
     }
 
     painter.drawText(x, y, text);
 }
 
-void RegisterView::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Escape && is_editing)
-    {
+void RegisterView::keyPressEvent(QKeyEvent *event) {
+    if (event->key() == Qt::Key_Escape && is_editing) {
         stop_editing();
         update();
         return;
     }
 
-    if (!is_editing)
-    {
-        if (event->key() == Qt::Key_F2)
-        {
+    if (!is_editing) {
+        if (event->key() == Qt::Key_F2) {
             start_editing();
             update();
-        }
-        else
-        {
+        } else {
             QFrame::keyPressEvent(event);
         }
-    }
-    else
-    {
-        if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter)
-        {
+    } else {
+        if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
             value = editing_value;
             emit(on_value_changed(value));
             is_editing = false;
             update();
-        }
-        else if (event->key() == Qt::Key_Backspace)
-        {
+        } else if (event->key() == Qt::Key_Backspace) {
             update();
-        }
-        else if (event->key() == Qt::Key_Left)
-        {
+        } else if (event->key() == Qt::Key_Left) {
             if (editing_nibble > 0)
                 editing_nibble--;
             update();
-        }
-        else if (event->key() == Qt::Key_Right)
-        {
+        } else if (event->key() == Qt::Key_Right) {
             int max_nibble = m_type == FLAGS ? 5 : ((m_type == WORD) ? 3 : 1);
             if (editing_nibble < max_nibble)
                 editing_nibble++;
             update();
-        }
-        else
-        {
+        } else {
             int key = event->key();
-            if (m_type == FLAGS)
-            {
-                if (key == Qt::Key_0 || key == Qt::Key_1)
-                {
+            if (m_type == FLAGS) {
+                if (key == Qt::Key_0 || key == Qt::Key_1) {
                     int bit = key - Qt::Key_0;
                     int max_nibble = 5;
-                    if (bit == 1)
-                    {
+                    if (bit == 1) {
                         editing_value |= (1 << (5 - editing_nibble));
-                    }
-                    else
-                    {
+                    } else {
                         editing_value &= ~(1 << (5 - editing_nibble));
                     }
 
@@ -190,11 +147,8 @@ void RegisterView::keyPressEvent(QKeyEvent *event)
                     update();
                 }
                 return;
-            }
-            else
-            {
-                if ((key >= Qt::Key_0 && key <= Qt::Key_9) || (key >= Qt::Key_A && key <= Qt::Key_F))
-                {
+            } else {
+                if ((key >= Qt::Key_0 && key <= Qt::Key_9) || (key >= Qt::Key_A && key <= Qt::Key_F)) {
                     int value = (key >= Qt::Key_A) ? (key - Qt::Key_A + 10) : (key - Qt::Key_0);
                     int max_nibble = (m_type == WORD) ? 3 : 1;
 
@@ -213,38 +167,31 @@ void RegisterView::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void RegisterView::mousePressEvent(QMouseEvent *event)
-{
+void RegisterView::mousePressEvent(QMouseEvent *event) {
     is_selected = true;
     update();
 }
 
-void RegisterView::mouseDoubleClickEvent(QMouseEvent *event)
-{
+void RegisterView::mouseDoubleClickEvent(QMouseEvent *event) {
     start_editing();
     update();
 }
 
-void RegisterView::focusInEvent(QFocusEvent *event)
-{
+void RegisterView::focusInEvent(QFocusEvent *event) {
     is_selected = true;
     update();
 }
 
-void RegisterView::focusOutEvent(QFocusEvent *event)
-{
+void RegisterView::focusOutEvent(QFocusEvent *event) {
     is_selected = false;
-    if (is_editing)
-    {
+    if (is_editing) {
         stop_editing();
     }
     update();
 }
 
-void RegisterView::start_editing()
-{
-    if (!enabled)
-    {
+void RegisterView::start_editing() {
+    if (!enabled) {
         emit on_edit_abort(REGISTER_DISABLED);
         return;
     }
@@ -255,8 +202,7 @@ void RegisterView::start_editing()
     editing_value = value;
 }
 
-void RegisterView::stop_editing()
-{
+void RegisterView::stop_editing() {
     blink_timer->stop();
     is_editing = false;
     blink_state = 1;
@@ -264,13 +210,11 @@ void RegisterView::stop_editing()
     editing_value = 0;
 }
 
-void RegisterView::showContextMenu(const QPoint &pos)
-{
+void RegisterView::showContextMenu(const QPoint &pos) {
     QMenu contextMenu(tr("Context menu"), this->parentWidget());
 
     QAction editAction("Edit\tF2", this);
-    connect(&editAction, &QAction::triggered, this, [this]
-            { start_editing(); });
+    connect(&editAction, &QAction::triggered, this, [this] { start_editing(); });
 
     contextMenu.addAction(&editAction);
 

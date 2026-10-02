@@ -5,21 +5,32 @@
 #include "label.h"
 #include <vector>
 
-class LabelManager
-{
+class LabelManager {
 public:
     LabelManager();
+
     ~LabelManager();
+
     std::vector<Label> *getLabels();
+
     void addLabel(Label label);
+
     void addLabels(std::vector<Label> *labels);
+
     void removeLabel(Label *label);
+
     std::vector<Label> getLabels(uint32_t start, uint32_t end);
+
     void clearRamLabels();
+
     void clearLabels();
+
     void clearLabels(uint32_t start, uint32_t end);
+
     bool getIsDirty();
+
     bool isValid(QString string, offs_t start, offs_t end);
+
     bool hasCollision(Label *label, offs_t start, offs_t end);
 
 private:

@@ -1,16 +1,14 @@
 #include "load.h"
 #include "../common/util.h"
 
-LoadDialog::LoadDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+LoadDialog::LoadDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
 
     setFixedSize(QSize(350, 250));
     setWindowTitle("Load Memory Options");
 }
 
-void LoadDialog::setupUi(QDialog *Dialog)
-{
+void LoadDialog::setupUi(QDialog *Dialog) {
     mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(10);
     mainLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
@@ -101,21 +99,17 @@ void LoadDialog::setupUi(QDialog *Dialog)
     end_edit->setEnabled(false);
 
     QMetaObject::connectSlotsByName(Dialog);
-
 } // setupUi
 
-void LoadDialog::retranslateUi(QDialog *Dialog)
-{
+void LoadDialog::retranslateUi(QDialog *Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
     start_label->setText(QApplication::translate("Dialog", "Start", nullptr));
     end_label->setText(QApplication::translate("Dialog", "End", nullptr));
     override_start_check->setText(QApplication::translate("Dialog", "Override Start", nullptr));
     text_label->setText(QApplication::translate("Dialog", "Device Name", nullptr));
-
 } // retranslateUi
 
-void LoadDialog::setSettings(LoadSettings settings)
-{
+void LoadDialog::setSettings(LoadSettings settings) {
     text_edit->setText(settings.device_name);
     start_edit->setText(toHex(settings.start));
     end_edit->setText(toHex(settings.end));
@@ -124,27 +118,24 @@ void LoadDialog::setSettings(LoadSettings settings)
     end_edit->setEnabled(!settings.auto_detect_start);
 }
 
-void LoadDialog::validate()
-{
+void LoadDialog::validate() {
     bool ok1;
     bool ok2;
 
     toInt(start_edit, ok1);
     toInt(end_edit, ok2);
 
-    if (ok1)
-    {
+    if (ok1) {
         accept();
     }
 }
 
-LoadSettings LoadDialog::getSettings()
-{
+LoadSettings LoadDialog::getSettings() {
     bool ok;
     return LoadSettings{
         text_edit->text(),
-        (offs_t)toInt(start_edit, ok),
-        (offs_t)toInt(end_edit, ok),
+        (offs_t) toInt(start_edit, ok),
+        (offs_t) toInt(end_edit, ok),
         !override_start_check->isChecked(),
     };
 }

@@ -7,8 +7,7 @@
 #include <QTextStream>
 #include <QFile>
 
-struct Breakpoint
-{
+struct Breakpoint {
     offs_t address;
     int type; // 0 = execute, 1 = read, 2 = write
     QString description;
@@ -17,10 +16,10 @@ struct Breakpoint
     bool is_hidden;
 };
 
-class BreakpointReader
-{
+class BreakpointReader {
 public:
     static std::vector<Breakpoint> *Read(QString path, bool &success);
+
     static void Write(QString path, std::vector<Breakpoint> *breakpoints, bool &success);
 };
 

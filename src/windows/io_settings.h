@@ -15,20 +15,19 @@
 #include <functional>
 #include "../dev/memory_map.h"
 
-struct IOSettingsInfo
-{
+struct IOSettingsInfo {
     offs_t led_address;
     offs_t dip_address;
 };
 
-class IOSettingsDialog : public QDialog
-{
+class IOSettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
     IOSettingsDialog(QWidget *parent = nullptr);
 
     void setIOSettings(IOSettingsInfo info);
+
     IOSettingsInfo getIOSettings();
 
     // returns true if the address is claimed by a device other than the LED/DIP arrays
@@ -46,7 +45,9 @@ private:
     QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *Dialog);
+
     void retranslateUi(QDialog *Dialog);
+
     void validate();
 };
 

@@ -15,82 +15,110 @@
 #include <thread>
 
 class et3400emu {
-
 public:
-  et3400emu(keypad_io *keypad, display_io *display);
-  ~et3400emu();
+    et3400emu(keypad_io *keypad, display_io *display);
 
-  void init();
-  void start();
-  void stop();
-  void reset();
+    ~et3400emu();
 
-  // IRQ is active low: the line stays low until it is released
-  void pull_irq_low();
-  void release_irq();
+    void init();
 
-  // NMI is active low and edge triggered: it fires once per high-to-low
-  // transition
-  void pull_nmi_low();
-  void release_nmi();
+    void start();
 
-  void halt();
-  void step();
-  void resume();
+    void stop();
 
-  void load_rom(std::string string, offs_t address, uint8_t *buffer,
-                size_t size);
-  void load_ram(offs_t address, uint8_t *buffer, size_t size);
+    void reset();
 
-  // uint8_t *get_memory();
-  bool get_running();
-  int get_cycles();
-  CpuStatus get_status();
-  void add_breakpoint(offs_t address);
-  void remove_breakpoint(offs_t address);
-  void add_or_remove_breakpoint(offs_t address);
-  bool has_breakpoint(offs_t address);
-  void handle_breakpoint();
-  void set_pc(uint16_t pc);
-  void set_sp(uint16_t sp);
-  void set_ix(uint16_t ix);
-  void set_acca(uint8_t acca);
-  void set_accb(uint8_t accb);
-  void set_cc(uint8_t cc);
+    // IRQ is active low: the line stays low until it is released
+    void pull_irq_low();
 
-  uint8_t read_byte(offs_t address);
-  void set_step_out();
+    void release_irq();
 
-  memory_mapped_device *get_block_device(offs_t address);
+    // NMI is active low and edge triggered: it fires once per high-to-low
+    // transition
+    void pull_nmi_low();
 
-  void set_clock_rate(int clock_rate);
-  int get_clock_rate();
-  unsigned long long total_cycles;
-  std::function<void()> on_render_frame;
-  std::function<void()> on_breakpoint;
+    void release_nmi();
 
-  memory_device *ram;
-  display_io *display;
-  keypad_io *keypad;
+    void halt();
 
-  MemoryMapManager *memory_map;
-  BreakpointManager *breakpoints;
-  LabelManager *labels;
+    void step();
+
+    void resume();
+
+    void load_rom(std::string string, offs_t address, uint8_t *buffer,
+                  size_t size);
+
+    void load_ram(offs_t address, uint8_t *buffer, size_t size);
+
+    // uint8_t *get_memory();
+    bool get_running();
+
+    int get_cycles();
+
+    CpuStatus get_status();
+
+    void add_breakpoint(offs_t address);
+
+    void remove_breakpoint(offs_t address);
+
+    void add_or_remove_breakpoint(offs_t address);
+
+    bool has_breakpoint(offs_t address);
+
+    void handle_breakpoint();
+
+    void set_pc(uint16_t pc);
+
+    void set_sp(uint16_t sp);
+
+    void set_ix(uint16_t ix);
+
+    void set_acca(uint8_t acca);
+
+    void set_accb(uint8_t accb);
+
+    void set_cc(uint8_t cc);
+
+    uint8_t read_byte(offs_t address);
+
+    void set_step_out();
+
+    memory_mapped_device *get_block_device(offs_t address);
+
+    void set_clock_rate(int clock_rate);
+
+    int get_clock_rate();
+
+    unsigned long long total_cycles;
+    std::function<void()> on_render_frame;
+    std::function<void()> on_breakpoint;
+
+    memory_device *ram;
+    display_io *display;
+    keypad_io *keypad;
+
+    MemoryMapManager *memory_map;
+    BreakpointManager *breakpoints;
+    LabelManager *labels;
 
 private:
-  MC6820 *mc6820 = nullptr;
-  m6800_cpu_device *device = nullptr;
-  std::thread thread;
-  int cycles = 0;
-  int clock_rate = 0;
-  bool is_running = false;
-  bool is_step_out = false;
+    MC6820 *mc6820 = nullptr;
+    m6800_cpu_device *device = nullptr;
+    std::thread thread;
+    int cycles = 0;
+    int clock_rate = 0;
+    bool is_running = false;
+    bool is_step_out = false;
 
-  uint32_t last_pc = 0;
-  void worker();
-  void render_frame();
-  bool check_breakpoint(uint32_t address);
-  bool debugger_instruction_hook(uint32_t address);
+    uint32_t last_pc = 0;
+
+    void worker();
+
+    void render_frame();
+
+    bool check_breakpoint(uint32_t address);
+
+    bool debugger_instruction_hook(uint32_t address);
 };
 
 #endif // ET3400EMU_H

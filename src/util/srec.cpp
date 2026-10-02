@@ -8,16 +8,13 @@
 
 QString SrecFile::error;
 
-bool is_srec(QString filename)
-{
+bool is_srec(QString filename) {
     return filename.endsWith(".obj", Qt::CaseInsensitive) || filename.endsWith(".s19", Qt::CaseInsensitive);
 }
 
-bool SrecFile::Read(QString path, std::vector<data_block> *blocks)
-{
+bool SrecFile::Read(QString path, std::vector<data_block> *blocks) {
     QFile file(path);
-    if (!file.open(QIODevice::ReadOnly))
-    {
+    if (!file.open(QIODevice::ReadOnly)) {
         // QMessageBox::information(0, "error", file.errorString());
         return false;
     }
@@ -28,35 +25,30 @@ bool SrecFile::Read(QString path, std::vector<data_block> *blocks)
     int line_num = 0;
     bool success = true;
 
-    while (!in.atEnd())
-    {
+    while (!in.atEnd()) {
         QString line = in.readLine();
 
         LOG_DEBUG << "Reading line " << line_num;
 
-        if (line.length() > 0)
-        {
+        if (line.length() > 0) {
             QString type = line.mid(0, 2);
 
             int bytecount = line.mid(2, 2).toUInt(&success, 16);
 
             LOG_DEBUG << "bytecount: " << bytecount;
 
-            if (!success)
-            {
+            if (!success) {
                 LOG_DEBUG << "Failed parsing byte count";
                 error += "Invalid byte count at line " + QString::number(line_num);
                 break;
             }
 
-            if (type == "S1")
-            {
+            if (type == "S1") {
                 uint16_t address = line.mid(4, 4).toUInt(&success, 16);
 
                 LOG_DEBUG << "address: " << address;
 
-                if (!success)
-                {
+                if (!success) {
                     LOG_DEBUG << "Failed parsing address";
                     error += "Invalid address at line " + QString::number(line_num);
                     break;
@@ -64,21 +56,18 @@ bool SrecFile::Read(QString path, std::vector<data_block> *blocks)
 
                 uint16_t length = bytecount - 3;
                 QString data = line.mid(8, length * 2);
-                uint8_t *buffer = (uint8_t *)malloc(length);
+                uint8_t *buffer = (uint8_t *) malloc(length);
 
-                for (int ptr = 0; ptr < length; ptr++)
-                {
+                for (int ptr = 0; ptr < length; ptr++) {
                     buffer[ptr] = data.mid(ptr * 2, 2).toUInt(&success, 16);
 
-                    if (!success)
-                    {
+                    if (!success) {
                         LOG_DEBUG << "Failed parsing data at byte " << ptr;
                         break;
                     }
                 }
 
-                if (!success)
-                {
+                if (!success) {
                     free(buffer);
                     error += "Invalid data at line " + QString::number(line_num);
                     break;
@@ -90,8 +79,7 @@ bool SrecFile::Read(QString path, std::vector<data_block> *blocks)
 
                 LOG_DEBUG << "checksum: " << checksumActual;
 
-                if (!success)
-                {
+                if (!success) {
                     LOG_DEBUG << "Failed parsing checksum";
                     error += "Invalid checksum at line " + QString::number(line_num);
                     break;
@@ -102,8 +90,7 @@ bool SrecFile::Read(QString path, std::vector<data_block> *blocks)
         line_num++;
     }
 
-    if (!success)
-    {
+    if (!success) {
         LOG_DEBUG << "Error reading S19 file at line " << line_num;
         return false;
     }
@@ -111,11 +98,9 @@ bool SrecFile::Read(QString path, std::vector<data_block> *blocks)
     return true;
 }
 
-bool SrecFile::Write(QString path, QString header, std::vector<data_block> *blocks, uint16_t startAddress)
-{
+bool SrecFile::Write(QString path, QString header, std::vector<data_block> *blocks, uint16_t startAddress) {
     QFile file(path);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-    {
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         // QMessageBox::information(0, "error", file.errorString());
         return false;
     }
@@ -130,18 +115,16 @@ bool SrecFile::Write(QString path, QString header, std::vector<data_block> *bloc
     return true;
 }
 
-void SrecFile::WriteHeader(QTextStream &out, QString header)
-{
+void SrecFile::WriteHeader(QTextStream &out, QString header) {
     size_t headerLength = header.length();
 
     out << "S0"
-        << QString("%1").arg(headerLength + 3, 2, 16, QChar('0')).toUpper()
-        << QString("%1").arg(0, 4, 16, QChar('0')).toUpper();
+            << QString("%1").arg(headerLength + 3, 2, 16, QChar('0')).toUpper()
+            << QString("%1").arg(0, 4, 16, QChar('0')).toUpper();
 
     uint8_t checksum = headerLength + 3;
 
-    for (int i = 0; i < headerLength; i++)
-    {
+    for (int i = 0; i < headerLength; i++) {
         checksum += header.at(i).unicode();
         out << QString("%1").arg(static_cast<int>(header.at(i).unicode()), 2, 16, QChar('0')).toUpper();
     }
@@ -151,21 +134,18 @@ void SrecFile::WriteHeader(QTextStream &out, QString header)
     out << NEWLINE;
 }
 
-uint16_t SrecFile::WriteRecords(QTextStream &out, std::vector<data_block> *blocks)
-{
+uint16_t SrecFile::WriteRecords(QTextStream &out, std::vector<data_block> *blocks) {
     std::vector<data_block>::iterator block = blocks->begin();
     uint16_t recordCount = 0;
 
-    while (block != blocks->end())
-    {
+    while (block != blocks->end()) {
         uint8_t checksum = ((*block).length + 3) + (((*block).address >> 8) & 0xFF) + ((*block).address & 0xFF);
 
         out << "S1"
-            << QString("%1").arg((*block).length + 3, 2, 16, QChar('0')).toUpper()
-            << QString("%1").arg((*block).address, 4, 16, QChar('0')).toUpper();
+                << QString("%1").arg((*block).length + 3, 2, 16, QChar('0')).toUpper()
+                << QString("%1").arg((*block).address, 4, 16, QChar('0')).toUpper();
 
-        for (int i = 0; i < (*block).length; i++)
-        {
+        for (int i = 0; i < (*block).length; i++) {
             checksum += (*block).data[i];
             out << QString("%1").arg((*block).data[i], 2, 16, QChar('0')).toUpper();
         }
@@ -180,11 +160,10 @@ uint16_t SrecFile::WriteRecords(QTextStream &out, std::vector<data_block> *block
     return recordCount;
 }
 
-void SrecFile::WriteRecordCount(QTextStream &out, uint16_t recordCount)
-{
+void SrecFile::WriteRecordCount(QTextStream &out, uint16_t recordCount) {
     out << "S5"
-        << QString("%1").arg(3, 2, 16, QChar('0')).toUpper()
-        << QString("%1").arg(recordCount, 4, 16, QChar('0')).toUpper();
+            << QString("%1").arg(3, 2, 16, QChar('0')).toUpper()
+            << QString("%1").arg(recordCount, 4, 16, QChar('0')).toUpper();
 
     uint8_t checksum = 3 + ((recordCount >> 8) & 0xFF) + (recordCount & 0xFF);
     checksum = ~(checksum & 0xFF);
@@ -193,11 +172,10 @@ void SrecFile::WriteRecordCount(QTextStream &out, uint16_t recordCount)
     out << NEWLINE;
 }
 
-void SrecFile::WriteTerminator(QTextStream &out, uint16_t startAddress)
-{
+void SrecFile::WriteTerminator(QTextStream &out, uint16_t startAddress) {
     out << "S9"
-        << QString("%1").arg(3, 2, 16, QChar('0')).toUpper()
-        << QString("%1").arg(startAddress, 4, 16, QChar('0')).toUpper();
+            << QString("%1").arg(3, 2, 16, QChar('0')).toUpper()
+            << QString("%1").arg(startAddress, 4, 16, QChar('0')).toUpper();
 
     uint8_t checksum = 3 + ((startAddress >> 8) & 0xFF) + (startAddress & 0xFF);
     checksum = ~(checksum & 0xFF);

@@ -23,52 +23,83 @@
 #include "../common/common_defs.h"
 #include "../util/memory_builder.h"
 
-class MemoryView : public QFrame
-{
+class MemoryView : public QFrame {
     Q_OBJECT
 
 public:
     MemoryView();
+
     MemoryView(QWidget *parent);
+
     ~MemoryView();
+
     void update_display();
+
     void scroll(int steps);
+
     void scrollTo(int value);
+
     void goToAddress(offs_t address);
-    int getSelectedAddress(); 
+
+    int getSelectedAddress();
+
     void scrollIntoView();
+
     void set_emulator(et3400emu *emu);
+
     // void set_range(offs_t start, offs_t end, uint8_t *memory);
     void set_device(memory_mapped_device *device);
 
     void setHeatMapEnabled(bool enabled);
+
     void setHeatMapDecay(int decay);
+
     void clearHeatMap();
 
     void rebuild();
 
-signals:
+    signals:
+
+
     void on_scroll(int steps);
+
     void on_size(int max);
+
     void on_offset_change(int offset);
+
     void on_heat_map_change(bool enabled, int decay);
+
     void on_heat_map_enabled_change(bool enabled);
+
     void on_heat_map_decay_change(int decay);
+
     void on_show_in_disassembly(offs_t adddress);
+
     void on_edit_abort(int reason);
-    
-public slots:
+
+public
+    slots:
+
+
     void redraw();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+
     bool eventFilter(QObject *obj, QEvent *event) override;
+
     void wheelEvent(QWheelEvent *event) override;
+
     void resizeEvent(QResizeEvent *event) override;
+
     void mousePressEvent(QMouseEvent *event) override;
+
     void keyPressEvent(QKeyEvent *event) override;
+
     void mouseDoubleClickEvent(QMouseEvent *event) override;
+
     void focusInEvent(QFocusEvent *event) override;
+
     void focusOutEvent(QFocusEvent *event) override;
 
 private:
@@ -117,15 +148,17 @@ private:
     bool gained_focus = false;
 
     void bufferDraw();
+
     void start_editing(uint16_t address);
+
     void stop_editing();
+
     void showContextMenu(const QPoint &pos);
 
     const int address_col_width = 80;
     const int data_cell_width = 30;
 
-    void setupUI(QWidget *parent)
-    {
+    void setupUI(QWidget *parent) {
         this->setFocusPolicy(Qt::StrongFocus);
 
         QHBoxLayout *layout = new QHBoxLayout(parent);

@@ -17,21 +17,20 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
-struct SaveSettings
-{
+struct SaveSettings {
     QString header;
     offs_t start;
     offs_t end;
 };
 
-class SaveDialog : public QDialog
-{
+class SaveDialog : public QDialog {
     Q_OBJECT
 
 public:
     SaveDialog();
 
     void setSettings(SaveSettings settings);
+
     SaveSettings getSettings();
 
 private:
@@ -52,7 +51,9 @@ private:
     QDialogButtonBox *buttonBox;
 
     void setupUi(QDialog *Dialog);
+
     void retranslateUi(QDialog *Dialog);
+
     void validate();
 };
 

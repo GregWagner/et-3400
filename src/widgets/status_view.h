@@ -11,18 +11,23 @@
 #include <QLabel>
 #include "register.h"
 
-class StatusView : public QFrame
-{
+class StatusView : public QFrame {
     Q_OBJECT
 
 public:
     StatusView();
+
     StatusView(QWidget *parent);
+
     ~StatusView();
+
     void set_emulator(et3400emu *emu);
+
     void set_enabled(bool enabled);
 
-signals:
+    signals:
+
+
     void on_edit_abort(int reason);
 
 private:

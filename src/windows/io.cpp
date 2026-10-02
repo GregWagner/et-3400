@@ -2,24 +2,22 @@
 #include "../common/util.h"
 #include <QMessageBox>
 
-IODialog::IODialog(QWidget *parent) : QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+IODialog::IODialog(QWidget *parent) : QDialog(
+    parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
 
     setFixedSize(QSize(280, 180));
     setWindowTitle("Input/Output");
 }
 
-void IODialog::setEmu(et3400emu *emu, Settings *settings)
-{
+void IODialog::setEmu(et3400emu *emu, Settings *settings) {
     this->emu = emu;
     this->settings = settings;
 
     create_devices();
 }
 
-void IODialog::create_devices()
-{
+void IODialog::create_devices() {
     led_device = new io_device("LED Array", settings->ioLEDAddress, 1, false);
     dip_device = new io_device("DIP Array", settings->ioDIPAddress, 1, true);
 
@@ -33,14 +31,12 @@ void IODialog::create_devices()
     update_status_bar();
 }
 
-void IODialog::update_status_bar()
-{
+void IODialog::update_status_bar() {
     led_status->setText(led_device == nullptr ? "LED: -" : QString("LED: %1").arg(toHex(led_device->get_start())));
     dip_status->setText(dip_device == nullptr ? "DIP: -" : QString("DIP: %1").arg(toHex(dip_device->get_start())));
 }
 
-void IODialog::destroy_devices()
-{
+void IODialog::destroy_devices() {
     if (emu == nullptr)
         return;
 
@@ -57,10 +53,8 @@ void IODialog::destroy_devices()
     dip_device = nullptr;
 }
 
-bool IODialog::address_in_use(offs_t address)
-{
-    for (auto *device : emu->memory_map->get_block_devices())
-    {
+bool IODialog::address_in_use(offs_t address) {
+    for (auto *device: emu->memory_map->get_block_devices()) {
         if (device == led_device || device == dip_device)
             continue;
 
@@ -71,13 +65,11 @@ bool IODialog::address_in_use(offs_t address)
     return false;
 }
 
-void IODialog::refresh()
-{
+void IODialog::refresh() {
     led_array->update_display();
 }
 
-void IODialog::closeEvent(QCloseEvent *event)
-{
+void IODialog::closeEvent(QCloseEvent *event) {
     destroy_devices();
 
     emu = nullptr;
@@ -85,9 +77,8 @@ void IODialog::closeEvent(QCloseEvent *event)
     QDialog::closeEvent(event);
 }
 
-void IODialog::setupUi(QDialog *Dialog)
-{
-    (void)Dialog;
+void IODialog::setupUi(QDialog *Dialog) {
+    (void) Dialog;
     mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
@@ -131,29 +122,26 @@ void IODialog::setupUi(QDialog *Dialog)
     update_status_bar();
 
     connect(settings_action, &QAction::triggered, this, &IODialog::show_io_settings);
-
 } // setupUi
 
-void IODialog::show_io_settings()
-{
+void IODialog::show_io_settings() {
     if (emu == nullptr)
         return;
 
     IOSettingsDialog *io_settings_dialog = new IOSettingsDialog(this);
 
-    io_settings_dialog->address_in_use = [this](offs_t address)
-    {
+    io_settings_dialog->address_in_use = [this](offs_t address) {
         return address_in_use(address);
     };
 
-    io_settings_dialog->setIOSettings(IOSettingsInfo({(offs_t)settings->ioLEDAddress, (offs_t)settings->ioDIPAddress}));
+    io_settings_dialog->setIOSettings(
+        IOSettingsInfo({(offs_t) settings->ioLEDAddress, (offs_t) settings->ioDIPAddress}));
 
-    if (io_settings_dialog->exec() == QDialog::Accepted)
-    {
+    if (io_settings_dialog->exec() == QDialog::Accepted) {
         IOSettingsInfo info = io_settings_dialog->getIOSettings();
 
-        if (info.led_address != static_cast<offs_t>(settings->ioLEDAddress) || info.dip_address != static_cast<offs_t>(settings->ioDIPAddress))
-        {
+        if (info.led_address != static_cast<offs_t>(settings->ioLEDAddress) || info.dip_address != static_cast<offs_t>(
+                settings->ioDIPAddress)) {
             settings->ioLEDAddress = info.led_address;
             settings->ioDIPAddress = info.dip_address;
 
@@ -169,8 +157,6 @@ void IODialog::show_io_settings()
     io_settings_dialog->deleteLater();
 }
 
-void IODialog::retranslateUi(QDialog *Dialog)
-{
+void IODialog::retranslateUi(QDialog *Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
-
 } // retranslateUi

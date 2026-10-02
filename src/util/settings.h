@@ -6,14 +6,12 @@
 
 class et3400emu;
 
-struct DeviceSetting
-{
+struct DeviceSetting {
     QString name;
     QString bit_pattern;
 };
 
-struct Settings
-{
+struct Settings {
     bool showTips;
     bool showHeatMap;
     bool showDasmView;
@@ -43,7 +41,9 @@ struct Settings
 };
 
 Settings load_settings();
+
 void save_settings(Settings *settings);
+
 void build_and_save_settings(Settings *settings, et3400emu *emu_ptr);
 
 #endif // SETTINGS_INI_H

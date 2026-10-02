@@ -85,204 +85,257 @@ class MainWindow;
 #include <QMessageBox>
 #include <QShortcut>
 
-class DebuggerDialog : public QDialog
-{
-	Q_OBJECT
+class DebuggerDialog : public QDialog {
+    Q_OBJECT
 
 public:
-	DebuggerDialog();
-	DebuggerDialog(QWidget *parent);
-	~DebuggerDialog();
-	void set_emulator(et3400emu *emu);
-	void set_settings(Settings *settings);
-	void set_parent_window(MainWindow *parent);
-	void update_button_state();
-	void refresh();
-	void io_refresh();
-	void after_load_ram();
-	void after_load_rom();
+    DebuggerDialog();
 
-	void goto_address(offs_t address);
+    DebuggerDialog(QWidget *parent);
 
-	void set_breakpoint_enabled(offs_t address, bool enabled);
+    ~DebuggerDialog();
 
-	void populate_breakpoints_table();
-	void update_clear_ram_labels_state();
+    void set_emulator(et3400emu *emu);
 
-	void goto_label();
-	void load_labels();
-	void save_labels();
-	void load_default_labels();
+    void set_settings(Settings *settings);
 
-	void load_breakpoints();
-	void save_breakpoints();
+    void set_parent_window(MainWindow *parent);
 
-	void update_devices();
+    void update_button_state();
 
-	void exit();
+    void refresh();
 
-	void show_tip();
+    void io_refresh();
 
-	void reset_disassembly_view();
-	memory_mapped_device *get_disassembly_device();
-	memory_mapped_device *get_memory_device();
+    void after_load_ram();
 
-	Settings *get_settings() const { return settings; }
+    void after_load_rom();
 
-	et3400emu *emu_ptr = nullptr;
-	DisassemblyView *disassembly_view = nullptr;
+    void goto_address(offs_t address);
 
-	void save_settings()
-	{
-		build_and_save_settings(settings, emu_ptr);
-	}
+    void set_breakpoint_enabled(offs_t address, bool enabled);
+
+    void populate_breakpoints_table();
+
+    void update_clear_ram_labels_state();
+
+    void goto_label();
+
+    void load_labels();
+
+    void save_labels();
+
+    void load_default_labels();
+
+    void load_breakpoints();
+
+    void save_breakpoints();
+
+    void update_devices();
+
+    void exit();
+
+    void show_tip();
+
+    void reset_disassembly_view();
+
+    memory_mapped_device *get_disassembly_device();
+
+    memory_mapped_device *get_memory_device();
+
+    Settings *get_settings() const { return settings; }
+
+    et3400emu *emu_ptr = nullptr;
+    DisassemblyView *disassembly_view = nullptr;
+
+    void save_settings() {
+        build_and_save_settings(settings, emu_ptr);
+    }
 
 protected:
-	void keyPressEvent(QKeyEvent *event) override;
-	void keyReleaseEvent(QKeyEvent *event) override;
-	void resizeEvent(QResizeEvent *event) override;
-	void closeEvent(QCloseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+
+    void keyReleaseEvent(QKeyEvent *event) override;
+
+    void resizeEvent(QResizeEvent *event) override;
+
+    void closeEvent(QCloseEvent *event) override;
 
 private:
-	QToolButton *start_button;
-	QToolButton *stop_button;
-	QToolButton *step_into_button;
-	QToolButton *step_over_button;
-	// QToolButton *step_out_button;
-	QToolButton *reset_button;
+    QToolButton *start_button;
+    QToolButton *stop_button;
+    QToolButton *step_into_button;
+    QToolButton *step_over_button;
+    // QToolButton *step_out_button;
+    QToolButton *reset_button;
 
-	// QSlider* slider;
-	QLabel *label;
+    // QSlider* slider;
+    QLabel *label;
 
-	QComboBox *memory_selector;
-	QComboBox *disassembly_selector;
+    QComboBox *memory_selector;
+    QComboBox *disassembly_selector;
 
-	QToolButton *view_button;
-	QAction *toggle_memory_action;
-	QAction *toggle_disassembly_action;
-	QAction *toggle_status_action;
+    QToolButton *view_button;
+    QAction *toggle_memory_action;
+    QAction *toggle_disassembly_action;
+    QAction *toggle_status_action;
 
-	QAction *heat_map_action;
-	QAction *set_heat_map_off_action;
-	QAction *set_heat_map_fade_action;
-	// QAction *set_heat_map_fade_slow_action;
-	QAction *set_heat_map_persist_action;
-	QAction *toggle_heat_map_action;
-	QAction *clear_heat_map_action;
+    QAction *heat_map_action;
+    QAction *set_heat_map_off_action;
+    QAction *set_heat_map_fade_action;
+    // QAction *set_heat_map_fade_slow_action;
+    QAction *set_heat_map_persist_action;
+    QAction *toggle_heat_map_action;
+    QAction *clear_heat_map_action;
 
-	QAction *refresh_disassembly_action;
-	QAction *toggle_autorefresh_disassembly_action;
-	QAction *clear_ram_action;
+    QAction *refresh_disassembly_action;
+    QAction *toggle_autorefresh_disassembly_action;
+    QAction *clear_ram_action;
 
-	QAction *debug_run_action = nullptr;
-	QAction *debug_stop_action = nullptr;
-	QAction *debug_step_over_action = nullptr;
-	QAction *debug_step_into_action = nullptr;
-	// QAction *debug_step_out_action = nullptr;
-	QAction *debug_reset_action = nullptr;
+    QAction *debug_run_action = nullptr;
+    QAction *debug_stop_action = nullptr;
+    QAction *debug_step_over_action = nullptr;
+    QAction *debug_step_into_action = nullptr;
+    // QAction *debug_step_out_action = nullptr;
+    QAction *debug_reset_action = nullptr;
 
-	MemoryView *memory_view = nullptr;
-	StatusView *status_view = nullptr;
+    MemoryView *memory_view = nullptr;
+    StatusView *status_view = nullptr;
 
-	Settings *settings = nullptr;
-	ClearRamSettings clearRamSettings{0x0000, 0x01FF, 0x00};
+    Settings *settings = nullptr;
+    ClearRamSettings clearRamSettings{0x0000, 0x01FF, 0x00};
 
-	MainWindow *parent_window = nullptr;
+    MainWindow *parent_window = nullptr;
 
-	bool emu_set;
+    bool emu_set;
 
-	bool selectDisassemblyDeviceByAddress(offs_t address);
-	bool selectMemoryDeviceByAddress(offs_t address);
+    bool selectDisassemblyDeviceByAddress(offs_t address);
 
-	void start(bool checked);
-	void stop(bool checked);
-	void step_into(bool checked);
-	void step_over(bool checked);
-	void step_out(bool checked);
-	void reset(bool checked);
+    bool selectMemoryDeviceByAddress(offs_t address);
 
-	void setupUI();
+    void start(bool checked);
 
-	void select_memory_location(int index);
-	void select_disassembly_location(int index);
+    void stop(bool checked);
 
-	void clear_ram();
-	void diassembly_refresh();
+    void step_into(bool checked);
 
-	int count_open_panels();
-	void toggle_memory_panel(bool checked);
-	void toggle_disassembly_panel(bool checked);
-	void toggle_status_panel(bool checked);
-	void toggle_heat_map();
+    void step_over(bool checked);
 
-	void set_heat_map_off();
-	void set_heat_map_fade();
-	void set_heat_map_fade_slow();
-	void set_heat_map_persist();
-	void clear_heat_map();
+    void step_out(bool checked);
 
-	void swap_views();
+    void reset(bool checked);
 
-	void toggle_auto_refresh_disassembly_panel(bool checked);
-	void toggle_load_default_labels(bool checked);
+    void setupUI();
 
-	void pauseAndUpdateDisassembler();
-	void stepAndUpdateDisassembler();
+    void select_memory_location(int index);
 
-	void add_breakpoint(offs_t address);
-	void remove_breakpoint(offs_t address);
-	void add_or_remove_breakpoint(offs_t address);
+    void select_disassembly_location(int index);
 
-	void breakpoint_handler(bool checked);
+    void clear_ram();
 
-	void load_rom();
-	void load_ram();
-	void save_ram();
+    void diassembly_refresh();
 
-	void save_ram_labels();
+    int count_open_panels();
 
-	QGroupBox *memory_groupBox = nullptr;
-	QGroupBox *disassembly_groupBox = nullptr;
-	QGroupBox *status_groupBox = nullptr;
-	QGroupBox *io_groupBox = nullptr;
-	QGroupBox *interrupt_groupBox = nullptr;
+    void toggle_memory_panel(bool checked);
 
-	LabelsDialog *labels_dialog = nullptr;
-	BreakpointsDialog *breakpoints_dialog = nullptr;
-	DevicesDialog *devices_dialog = nullptr;
+    void toggle_disassembly_panel(bool checked);
 
-	void show_labels_dialog();
-	void show_breakpoints_dialog();
-	void show_save_view_dialog();
-	void show_devices_dialog();
+    void toggle_status_panel(bool checked);
 
-	QToolBar *create_menu_toolbar();
-	QToolBar *create_shortcuts_toolbar();
+    void toggle_heat_map();
 
-	QToolButton *create_file_menu(QToolBar *toolbar);
-	QToolButton *create_debug_menu(QToolBar *toolbar);
-	QToolButton *create_view_menu(QToolBar *toolbar);
-	QToolButton *create_settings_menu(QToolBar *toolbar);
+    void set_heat_map_off();
 
-	QGroupBox *create_status_group();
-	QGroupBox *create_interrupt_group();
-	QGroupBox *create_io_group();
-	QGroupBox *create_disassembly_group();
-	QGroupBox *create_memory_group();
+    void set_heat_map_fade();
 
-	void create_io_devices();
-	void destroy_io_devices();
+    void set_heat_map_fade_slow();
 
-	QString get_error_message(int reason);
+    void set_heat_map_persist();
 
-	LEDArray *led_array = nullptr;
-	DIPArray *dip_array = nullptr;
+    void clear_heat_map();
 
-	io_device *led_device = nullptr;
-	io_device *dip_device = nullptr;
+    void swap_views();
 
-	void show_io_settings();
-	bool address_in_use(offs_t address);
+    void toggle_auto_refresh_disassembly_panel(bool checked);
+
+    void toggle_load_default_labels(bool checked);
+
+    void pauseAndUpdateDisassembler();
+
+    void stepAndUpdateDisassembler();
+
+    void add_breakpoint(offs_t address);
+
+    void remove_breakpoint(offs_t address);
+
+    void add_or_remove_breakpoint(offs_t address);
+
+    void breakpoint_handler(bool checked);
+
+    void load_rom();
+
+    void load_ram();
+
+    void save_ram();
+
+    void save_ram_labels();
+
+    QGroupBox *memory_groupBox = nullptr;
+    QGroupBox *disassembly_groupBox = nullptr;
+    QGroupBox *status_groupBox = nullptr;
+    QGroupBox *io_groupBox = nullptr;
+    QGroupBox *interrupt_groupBox = nullptr;
+
+    LabelsDialog *labels_dialog = nullptr;
+    BreakpointsDialog *breakpoints_dialog = nullptr;
+    DevicesDialog *devices_dialog = nullptr;
+
+    void show_labels_dialog();
+
+    void show_breakpoints_dialog();
+
+    void show_save_view_dialog();
+
+    void show_devices_dialog();
+
+    QToolBar *create_menu_toolbar();
+
+    QToolBar *create_shortcuts_toolbar();
+
+    QToolButton *create_file_menu(QToolBar *toolbar);
+
+    QToolButton *create_debug_menu(QToolBar *toolbar);
+
+    QToolButton *create_view_menu(QToolBar *toolbar);
+
+    QToolButton *create_settings_menu(QToolBar *toolbar);
+
+    QGroupBox *create_status_group();
+
+    QGroupBox *create_interrupt_group();
+
+    QGroupBox *create_io_group();
+
+    QGroupBox *create_disassembly_group();
+
+    QGroupBox *create_memory_group();
+
+    void create_io_devices();
+
+    void destroy_io_devices();
+
+    QString get_error_message(int reason);
+
+    LEDArray *led_array = nullptr;
+    DIPArray *dip_array = nullptr;
+
+    io_device *led_device = nullptr;
+    io_device *dip_device = nullptr;
+
+    void show_io_settings();
+
+    bool address_in_use(offs_t address);
 };
 
 #endif // DEBUGGER_H

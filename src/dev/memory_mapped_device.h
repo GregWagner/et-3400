@@ -28,21 +28,44 @@
 /*
   The base class for a memory-mapped device
 */
-class memory_mapped_device
-{
+class memory_mapped_device {
 public:
     virtual ~memory_mapped_device() = default;
-    virtual uint8_t read(offs_t addr) { (void)addr; return 0; }
-    virtual void write(offs_t addr, uint8_t data) { (void)addr; (void)data; }
-    virtual void write_block(offs_t addr, uint8_t *data, size_t size) { (void)addr; (void)data; (void)size; }
-    virtual bool is_mapped(offs_t addr) { (void)addr; return true; }
+
+    virtual uint8_t read(offs_t addr) {
+        (void) addr;
+        return 0;
+    }
+
+    virtual void write(offs_t addr, uint8_t data) {
+        (void) addr;
+        (void) data;
+    }
+
+    virtual void write_block(offs_t addr, uint8_t *data, size_t size) {
+        (void) addr;
+        (void) data;
+        (void) size;
+    }
+
+    virtual bool is_mapped(offs_t addr) {
+        (void) addr;
+        return true;
+    }
+
     virtual uint8_t get_flags() { return DEVICE_READ | DEVICE_WRITE; }
     virtual uint8_t *get_mapped_memory() { return nullptr; }
     virtual offs_t get_start() { return 0; }
     virtual offs_t get_end() { return 0; }
     virtual offs_t get_size() { return get_end() - get_start() + 1; }
     virtual bool is_custom() { return false; }
-    virtual void load(offs_t addr, uint8_t *data, size_t size) { (void)addr; (void)data; (void)size; }
+
+    virtual void load(offs_t addr, uint8_t *data, size_t size) {
+        (void) addr;
+        (void) data;
+        (void) size;
+    }
+
     void set_settings(Settings *settings) { this->settings = settings; }
 
     std::function<void(offs_t addr, uint8_t data)> write_hook = nullptr;
@@ -55,11 +78,9 @@ public:
 
 protected:
     Settings *settings = nullptr;
-
 };
 
-struct mapped_memory_block
-{
+struct mapped_memory_block {
     memory_mapped_device *device;
 };
 

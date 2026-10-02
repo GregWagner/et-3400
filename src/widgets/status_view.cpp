@@ -3,8 +3,7 @@
 #include "../emu/et3400.h"
 
 StatusView::StatusView()
-    : QFrame(nullptr)
-{
+    : QFrame(nullptr) {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setLineWidth(3);
 
@@ -34,8 +33,7 @@ StatusView::StatusView()
 }
 
 StatusView::StatusView(QWidget *parent)
-    : QFrame(parent)
-{
+    : QFrame(parent) {
     setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
     setLineWidth(3);
 
@@ -92,68 +90,72 @@ StatusView::StatusView(QWidget *parent)
     // connect(action, &QAction::triggered, this, &Display::redraw);
 
     // this->setFixedSize(QSize(320, 85));
-    connect(pc_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
-            {
-        if (is_emulator_set)
-        {
+    connect(pc_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value) {
+        if (is_emulator_set) {
             emu_ptr->set_pc(new_value);
-        } });
-    connect(sp_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
-            {
-        if (is_emulator_set)
-        {
+        }
+    });
+    connect(sp_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value) {
+        if (is_emulator_set) {
             emu_ptr->set_sp(new_value);
-        } });
-    connect(ix_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
-            {
-        if (is_emulator_set)
-        {
+        }
+    });
+    connect(ix_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value) {
+        if (is_emulator_set) {
             emu_ptr->set_ix(new_value);
-        } });
-    connect(acca_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
-            {
-        if (is_emulator_set)
-        {
+        }
+    });
+    connect(acca_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value) {
+        if (is_emulator_set) {
             emu_ptr->set_acca(new_value);
-        } });
-    connect(accb_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
-            {
-        if (is_emulator_set)
-        {
+        }
+    });
+    connect(accb_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value) {
+        if (is_emulator_set) {
             emu_ptr->set_accb(new_value);
-        } });
-    connect(cc_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value)
-            {
-        if (is_emulator_set)
-        {
+        }
+    });
+    connect(cc_label, &RegisterView::on_value_changed, this, [this](uint16_t new_value) {
+        if (is_emulator_set) {
             emu_ptr->set_cc(new_value);
-        } });
+        }
+    });
 
-    connect(pc_label, &RegisterView::on_edit_abort, this, [this](int reason)
-            { emit this->on_edit_abort(reason); });
-    connect(sp_label, &RegisterView::on_edit_abort, this, [this](int reason)
-            { emit this->on_edit_abort(reason); });
-    connect(ix_label, &RegisterView::on_edit_abort, this, [this](int reason)
-            { emit this->on_edit_abort(reason); });
-    connect(acca_label, &RegisterView::on_edit_abort, this, [this](int reason)
-            { emit this->on_edit_abort(reason); });
-    connect(accb_label, &RegisterView::on_edit_abort, this, [this](int reason)
-            { emit this->on_edit_abort(reason); });
-    connect(cc_label, &RegisterView::on_edit_abort, this, [this](int reason)
-            { emit this->on_edit_abort(reason); });
+    connect(pc_label, &RegisterView::on_edit_abort, this, [this](int reason) {
+        emit
+        this->on_edit_abort(reason);
+    });
+    connect(sp_label, &RegisterView::on_edit_abort, this, [this](int reason) {
+        emit
+        this->on_edit_abort(reason);
+    });
+    connect(ix_label, &RegisterView::on_edit_abort, this, [this](int reason) {
+        emit
+        this->on_edit_abort(reason);
+    });
+    connect(acca_label, &RegisterView::on_edit_abort, this, [this](int reason) {
+        emit
+        this->on_edit_abort(reason);
+    });
+    connect(accb_label, &RegisterView::on_edit_abort, this, [this](int reason) {
+        emit
+        this->on_edit_abort(reason);
+    });
+    connect(cc_label, &RegisterView::on_edit_abort, this, [this](int reason) {
+        emit
+        this->on_edit_abort(reason);
+    });
 
     setLayout(mainLayout);
     setLineWidth(3);
 }
 
-StatusView::~StatusView()
-{
+StatusView::~StatusView() {
     m_paintTimer->stop();
     delete m_paintTimer;
 }
 
-void StatusView::set_enabled(bool enabled)
-{
+void StatusView::set_enabled(bool enabled) {
     pc_label->set_enabled(enabled);
     sp_label->set_enabled(enabled);
     ix_label->set_enabled(enabled);
@@ -162,10 +164,8 @@ void StatusView::set_enabled(bool enabled)
     cc_label->set_enabled(enabled);
 }
 
-void StatusView::update()
-{
-    if (is_emulator_set)
-    {
+void StatusView::update() {
+    if (is_emulator_set) {
         CpuStatus status = emu_ptr->get_status();
         pc_label->set_value(status.pc);
         sp_label->set_value(status.sp);
@@ -176,8 +176,7 @@ void StatusView::update()
     }
 }
 
-void StatusView::set_emulator(et3400emu *emu)
-{
+void StatusView::set_emulator(et3400emu *emu) {
     emu_ptr = emu;
     is_emulator_set = true;
 }

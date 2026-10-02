@@ -2,16 +2,15 @@
 #include "../common/util.h"
 #include <QMessageBox>
 
-BreakpointDialog::BreakpointDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+BreakpointDialog::BreakpointDialog() : QDialog(
+    0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
 
     setFixedSize(QSize(250, 100));
     setWindowTitle("Add Breakpoint");
 }
 
-void BreakpointDialog::setupUi(QDialog *Dialog)
-{
+void BreakpointDialog::setupUi(QDialog *Dialog) {
     mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(10);
     mainLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
@@ -74,23 +73,19 @@ void BreakpointDialog::setupUi(QDialog *Dialog)
     QMetaObject::connectSlotsByName(Dialog);
 } // setupUi
 
-void BreakpointDialog::retranslateUi(QDialog *Dialog)
-{
+void BreakpointDialog::retranslateUi(QDialog *Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
 
     address_label->setText(QApplication::translate("Dialog", "Address", nullptr));
-
 } // retranslateUi
 
-void BreakpointDialog::addBreakpoint(offs_t address)
-{
+void BreakpointDialog::addBreakpoint(offs_t address) {
     address_edit->setText(toHex(address));
 
     ref_breakpoint = nullptr;
 }
 
-void BreakpointDialog::editBreakpoint(Breakpoint *breakpoint)
-{
+void BreakpointDialog::editBreakpoint(Breakpoint *breakpoint) {
     setWindowTitle("Edit Breakpoint");
 
     address_edit->setText(toHex(breakpoint->address));
@@ -98,20 +93,17 @@ void BreakpointDialog::editBreakpoint(Breakpoint *breakpoint)
     ref_breakpoint = breakpoint;
 }
 
-void BreakpointDialog::validate()
-{
+void BreakpointDialog::validate() {
     bool ok1 = true;
 
     int start = toInt(address_edit, ok1);
 
-    if (!ok1)
-    {
+    if (!ok1) {
         QMessageBox::critical(this, "Breakpoint Error", "Invalid address", QMessageBox::Ok);
         return;
     }
 
-    if (start > 0xFFFF)
-    {
+    if (start > 0xFFFF) {
         QMessageBox::critical(this, "Breakpoint Error", "Address is out of bounds", QMessageBox::Ok);
         return;
     }
@@ -122,18 +114,16 @@ void BreakpointDialog::validate()
     //     return;
     // }
 
-    if (ok1)
-    {
+    if (ok1) {
         accept();
     }
 }
 
-BreakpointInfo BreakpointDialog::getBreakpoint()
-{
+BreakpointInfo BreakpointDialog::getBreakpoint() {
     bool ok = true;
     int start = toInt(address_edit, ok);
 
     return BreakpointInfo{
-        (offs_t)start,
+        (offs_t) start,
     };
 }

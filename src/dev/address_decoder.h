@@ -5,8 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-typedef struct
-{
+typedef struct {
     char pattern[17];
     uint16_t mask;
     uint16_t expected;
@@ -15,7 +14,9 @@ typedef struct
 } BitPattern;
 
 bool is_pattern_valid(const char *pat);
+
 BitPattern parse_pattern(const char *pat);
+
 bool match_pattern(BitPattern bp, uint16_t input);
 
 #endif // ADDRESS_DECODER_H

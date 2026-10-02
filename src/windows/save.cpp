@@ -1,16 +1,14 @@
 #include "save.h"
 #include "../common/util.h"
 
-SaveDialog::SaveDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+SaveDialog::SaveDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
 
     setFixedSize(QSize(350, 250));
     setWindowTitle("Save RAM Options");
 }
 
-void SaveDialog::setupUi(QDialog *Dialog)
-{
+void SaveDialog::setupUi(QDialog *Dialog) {
     mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(10);
     mainLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
@@ -111,33 +109,28 @@ void SaveDialog::setupUi(QDialog *Dialog)
     connect(buttonBox, &QDialogButtonBox::rejected, this, &SaveDialog::reject);
 
     QMetaObject::connectSlotsByName(Dialog);
-
 } // setupUi
 
-void SaveDialog::retranslateUi(QDialog *Dialog)
-{
+void SaveDialog::retranslateUi(QDialog *Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
     description_label->setText(QApplication::translate("Dialog", "Enter the range to save ($0000-$01FF)", nullptr));
     start_label->setText(QApplication::translate("Dialog", "Start", nullptr));
     end_label->setText(QApplication::translate("Dialog", "End", nullptr));
     note_label->setText(QApplication::translate("Dialog", "Monitor RAM ($00C5-$00FF) will be excluded", nullptr));
     // text_label->setText(QApplication::translate("Dialog", "Header", nullptr));
-
 } // retranslateUi
 
-void SaveDialog::setSettings(SaveSettings settings)
-{
+void SaveDialog::setSettings(SaveSettings settings) {
     // text_edit->setText(settings.header);
     start_edit->setText(toHex(settings.start));
     end_edit->setText(toHex(settings.end));
 }
 
-void SaveDialog::validate()
-{
+void SaveDialog::validate() {
     bool ok1, ok2;
 
     int start = toInt(start_edit, ok1);
-    int end   = toInt(end_edit, ok2);
+    int end = toInt(end_edit, ok2);
 
     QStringList errors;
     if (!ok1) errors << "Invalid start address.";
@@ -145,24 +138,20 @@ void SaveDialog::validate()
     if (ok1 && ok2 && end <= start) errors << "Start must be less than end.";
     if (ok2 && end > 0x01FF) errors << "End address exceeds $01FF.";
 
-    if (errors.isEmpty())
-    {
+    if (errors.isEmpty()) {
         error_label->hide();
         accept();
-    }
-    else
-    {
+    } else {
         error_label->setText(errors.join(" "));
         error_label->show();
     }
 }
 
-SaveSettings SaveDialog::getSettings()
-{
+SaveSettings SaveDialog::getSettings() {
     bool ok;
     return SaveSettings{
         "", // text_edit->text(),
-        (offs_t)toInt(start_edit, ok),
-        (offs_t)toInt(end_edit, ok),
+        (offs_t) toInt(start_edit, ok),
+        (offs_t) toInt(end_edit, ok),
     };
 }

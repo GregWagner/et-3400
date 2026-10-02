@@ -1,43 +1,45 @@
 #include "disassembler.h"
 
 const char Disassembler::op_name_str_orig[128][8] =
-    {
-        "aba", "abx", "adca", "adcb", "adda", "addb", "addd", "aim",
-        "anda", "andb", "asl", "asla", "aslb", "asld", "asr", "asra",
-        "asrb", "bcc", "bcs", "beq", "bge", "bgt", "bhi", "bita",
-        "bitb", "ble", "bls", "blt", "bmi", "bne", "bpl", "bra",
-        "brn", "bsr", "bvc", "bvs", "cba", "clc", "cli", "clr",
-        "clra", "clrb", "clv", "cmpa", "cmpb", "cmpx", "com", "coma",
-        "comb", "daa", "dec", "deca", "decb", "des", "dex", "eim",
-        "eora", "eorb", "illegal", "inc", "inca", "incb", "ins", "inx",
-        "jmp", "jsr", "lda", "ldb", "ldd", "lds", "ldx", "lsr",
-        "lsra", "lsrb", "lsrd", "mul", "neg", "nega", "negb", "nop",
-        "oim", "ora", "orb", "psha", "pshb", "pshx", "pula", "pulb",
-        "pulx", "rol", "rola", "rolb", "ror", "rora", "rorb", "rti",
-        "rts", "sba", "sbca", "sbcb", "sec", "sev", "sta", "stb",
-        "std", "sei", "sts", "stx", "suba", "subb", "subd", "swi",
-        "wai", "tab", "tap", "tba", "tim", "tpa", "tst", "tsta",
-        "tstb", "tsx", "txs", "asx1", "asx2", "xgdx", "addx", "adcx"};
+{
+    "aba", "abx", "adca", "adcb", "adda", "addb", "addd", "aim",
+    "anda", "andb", "asl", "asla", "aslb", "asld", "asr", "asra",
+    "asrb", "bcc", "bcs", "beq", "bge", "bgt", "bhi", "bita",
+    "bitb", "ble", "bls", "blt", "bmi", "bne", "bpl", "bra",
+    "brn", "bsr", "bvc", "bvs", "cba", "clc", "cli", "clr",
+    "clra", "clrb", "clv", "cmpa", "cmpb", "cmpx", "com", "coma",
+    "comb", "daa", "dec", "deca", "decb", "des", "dex", "eim",
+    "eora", "eorb", "illegal", "inc", "inca", "incb", "ins", "inx",
+    "jmp", "jsr", "lda", "ldb", "ldd", "lds", "ldx", "lsr",
+    "lsra", "lsrb", "lsrd", "mul", "neg", "nega", "negb", "nop",
+    "oim", "ora", "orb", "psha", "pshb", "pshx", "pula", "pulb",
+    "pulx", "rol", "rola", "rolb", "ror", "rora", "rorb", "rti",
+    "rts", "sba", "sbca", "sbcb", "sec", "sev", "sta", "stb",
+    "std", "sei", "sts", "stx", "suba", "subb", "subd", "swi",
+    "wai", "tab", "tap", "tba", "tim", "tpa", "tst", "tsta",
+    "tstb", "tsx", "txs", "asx1", "asx2", "xgdx", "addx", "adcx"
+};
 
 const char Disassembler::op_name_str[129][8] =
-    {
-        "aba", "abx", "adca", "adcb", "adda", "addb", "addd", "aim",
-        "anda", "andb", "asl", "asla", "aslb", "asld", "asr", "asra",
-        "asrb", "bcc", "bcs", "beq", "bge", "bgt", "bhi", "bita",
-        "bitb", "ble", "bls", "blt", "bmi", "bne", "bpl", "bra",
-        "brn", "bsr", "bvc", "bvs", "cba", "clc", "cli", "clr",
-        "clra", "clrb", "clv", "cmpa", "cmpb", "cpx", "com", "coma",
-        "comb", "daa", "dec", "deca", "decb", "des", "dex", "eim",
-        "eora", "eorb", "illegal", "inc", "inca", "incb", "ins", "inx",
-        "jmp", "jsr", "ldaa", "ldab", "ldd", "lds", "ldx", "lsr",
-        "lsra", "lsrb", "lsrd", "mul", "neg", "nega", "negb", "nop",
-        "oim", "oraa", "orab", "psha", "pshb", "pshx", "pula", "pulb",
-        "pulx", "rol", "rola", "rolb", "ror", "rora", "rorb", "rti",
-        "rts", "sba", "sbca", "sbcb", "sec", "sev", "staa", "stab",
-        "std", "sei", "sts", "stx", "suba", "subb", "subd", "swi",
-        "wai", "tab", "tap", "tba", "tim", "tpa", "tst", "tsta",
-        "tstb", "tsx", "txs", "asx1", "asx2", "xgdx", "addx", "adcx",
-        "nba"};
+{
+    "aba", "abx", "adca", "adcb", "adda", "addb", "addd", "aim",
+    "anda", "andb", "asl", "asla", "aslb", "asld", "asr", "asra",
+    "asrb", "bcc", "bcs", "beq", "bge", "bgt", "bhi", "bita",
+    "bitb", "ble", "bls", "blt", "bmi", "bne", "bpl", "bra",
+    "brn", "bsr", "bvc", "bvs", "cba", "clc", "cli", "clr",
+    "clra", "clrb", "clv", "cmpa", "cmpb", "cpx", "com", "coma",
+    "comb", "daa", "dec", "deca", "decb", "des", "dex", "eim",
+    "eora", "eorb", "illegal", "inc", "inca", "incb", "ins", "inx",
+    "jmp", "jsr", "ldaa", "ldab", "ldd", "lds", "ldx", "lsr",
+    "lsra", "lsrb", "lsrd", "mul", "neg", "nega", "negb", "nop",
+    "oim", "oraa", "orab", "psha", "pshb", "pshx", "pula", "pulb",
+    "pulx", "rol", "rola", "rolb", "ror", "rora", "rorb", "rti",
+    "rts", "sba", "sbca", "sbcb", "sec", "sev", "staa", "stab",
+    "std", "sei", "sts", "stx", "suba", "subb", "subd", "swi",
+    "wai", "tab", "tap", "tba", "tim", "tpa", "tst", "tsta",
+    "tstb", "tsx", "txs", "asx1", "asx2", "xgdx", "addx", "adcx",
+    "nba"
+};
 
 /*
  * This table defines the opcodes:
@@ -324,59 +326,53 @@ int Disassembler::table[258][3] = {
     /* extra instruction $fc for NSC-8105 */
     {Disassembler::addx, Disassembler::ext, 0},
     /* extra instruction $ec for NSC-8105 */
-    {Disassembler::adcx, Disassembler::imb, 0}};
+    {Disassembler::adcx, Disassembler::imb, 0}
+};
 
-int Disassembler::SIGNED(int b)
-{
-    return ((int)((b & 0x80) == 0x80 ? b | 0xffffff00 : b));
+int Disassembler::SIGNED(int b) {
+    return ((int) ((b & 0x80) == 0x80 ? b | 0xffffff00 : b));
 }
 
-bool Disassembler::IsSubroutine(uint8_t opcode)
-{
+bool Disassembler::IsSubroutine(uint8_t opcode) {
     return opcode == bsr || opcode == jsr;
 }
 
-bool Disassembler::IsReturn(uint8_t opcode)
-{
+bool Disassembler::IsReturn(uint8_t opcode) {
     return opcode == rti || opcode == rts;
 }
 
-int Disassembler::get_instruction_length(uint8_t args)
-{
-    switch (args)
-    {
-    case rel: /* relative */
-        return 2;
-    case imb: /* immediate (byte) */
-        return 2;
-    case imw: /* immediate (word) */
-        return 3;
-    case idx: /* indexed + byte offset */
-        return 2;
-    case imx: /* immediate, indexed + byte offset */
-        return 3;
-    case dir: /* direct address */
-        return 2;
-    case imd: /* immediate, direct address */
-        return 3;
-    case ext: /* extended address */
-        return 3;
-    case sx1: /* byte from address (s + 1) */
-        return 1;
-    default:
-        return 1;
+int Disassembler::get_instruction_length(uint8_t args) {
+    switch (args) {
+        case rel: /* relative */
+            return 2;
+        case imb: /* immediate (byte) */
+            return 2;
+        case imw: /* immediate (word) */
+            return 3;
+        case idx: /* indexed + byte offset */
+            return 2;
+        case imx: /* immediate, indexed + byte offset */
+            return 3;
+        case dir: /* direct address */
+            return 2;
+        case imd: /* immediate, direct address */
+            return 3;
+        case ext: /* extended address */
+            return 3;
+        case sx1: /* byte from address (s + 1) */
+            return 1;
+        default:
+            return 1;
     }
 }
 
-int *Disassembler::GetTableEntry(uint8_t code)
-{
+int *Disassembler::GetTableEntry(uint8_t code) {
     return table[code];
 }
 
-DasmResult Disassembler::disassemble(uint8_t *memory, offs_t address)
-{
-    static char *instruction = (char *)malloc(8);
-    static char *operand = (char *)malloc(8);
+DasmResult Disassembler::disassemble(uint8_t *memory, offs_t address) {
+    static char *instruction = (char *) malloc(8);
+    static char *operand = (char *) malloc(8);
 
     int flags = 0;
     int invalid_mask;
@@ -409,47 +405,46 @@ DasmResult Disassembler::disassemble(uint8_t *memory, offs_t address)
     // int byteLength = 0;
     sprintf(operand, "");
 
-    switch (args)
-    {
-    case rel: /* relative */
-        sprintf(operand, "$%04X", address + SIGNED(memory[1]) + 2);
-        byteLength = 2;
-        break;
-    case imb: /* immediate (byte) */
-        sprintf(operand, "#$%02X", memory[1]);
-        byteLength = 2;
-        break;
-    case imw: /* immediate (word) */
-        sprintf(operand, "#$%04X", (memory[1] << 8) + memory[2]);
-        byteLength = 3;
-        break;
-    case idx: /* indexed + byte offset */
-        sprintf(operand, "$%02X,x", memory[1]);
-        byteLength = 2;
-        break;
-    case imx: /* immediate, indexed + byte offset */
-        sprintf(operand, "#$%02X,(x+$%02X)", memory[1], memory[2]);
-        byteLength = 3;
-        break;
-    case dir: /* direct address */
-        sprintf(operand, "$%02X", memory[1]);
-        byteLength = 2;
-        break;
-    case imd: /* immediate, direct address */
-        sprintf(operand, "#$%02X,$%02X", memory[1], memory[2]);
-        byteLength = 3;
-        break;
-    case ext: /* extended address */
-        sprintf(operand, "$%04X", (memory[1] << 8) + memory[2]);
-        byteLength = 3;
-        break;
-    case sx1: /* byte from address (s + 1) */
-        sprintf(operand, "(s+1)");
-        byteLength = 1;
-        break;
-    default:
-        byteLength = 1;
-        break;
+    switch (args) {
+        case rel: /* relative */
+            sprintf(operand, "$%04X", address + SIGNED(memory[1]) + 2);
+            byteLength = 2;
+            break;
+        case imb: /* immediate (byte) */
+            sprintf(operand, "#$%02X", memory[1]);
+            byteLength = 2;
+            break;
+        case imw: /* immediate (word) */
+            sprintf(operand, "#$%04X", (memory[1] << 8) + memory[2]);
+            byteLength = 3;
+            break;
+        case idx: /* indexed + byte offset */
+            sprintf(operand, "$%02X,x", memory[1]);
+            byteLength = 2;
+            break;
+        case imx: /* immediate, indexed + byte offset */
+            sprintf(operand, "#$%02X,(x+$%02X)", memory[1], memory[2]);
+            byteLength = 3;
+            break;
+        case dir: /* direct address */
+            sprintf(operand, "$%02X", memory[1]);
+            byteLength = 2;
+            break;
+        case imd: /* immediate, direct address */
+            sprintf(operand, "#$%02X,$%02X", memory[1], memory[2]);
+            byteLength = 3;
+            break;
+        case ext: /* extended address */
+            sprintf(operand, "$%04X", (memory[1] << 8) + memory[2]);
+            byteLength = 3;
+            break;
+        case sx1: /* byte from address (s + 1) */
+            sprintf(operand, "(s+1)");
+            byteLength = 1;
+            break;
+        default:
+            byteLength = 1;
+            break;
     }
 
     return DasmResult{
@@ -457,7 +452,8 @@ DasmResult Disassembler::disassemble(uint8_t *memory, offs_t address)
         operand,
         instruction,
         flags | DASMFLAG_SUPPORTED,
-        byteLength};
+        byteLength
+    };
     // return new DasmResult(){
     //     Instruction = instruction,
     //     Operand = operand,

@@ -9,18 +9,25 @@
 #include <QAction>
 #include "../dev/display_dev.h"
 #include "../util/settings.h"
-class DisplayWidget : public QWidget
-{
+
+class DisplayWidget : public QWidget {
     Q_OBJECT
 
 public:
     explicit DisplayWidget(QWidget *parent = nullptr);
+
     ~DisplayWidget();
+
     display_io *device = nullptr;
+
     void update_display();
+
     void set_settings(Settings *settings);
 
-public slots:
+public
+    slots:
+
+
     void redraw();
 
 protected:
@@ -33,7 +40,6 @@ private:
     QAction *action;
     bool running;
     uint8_t segment[6];
-
 };
 
 #endif // DISPLAY_H

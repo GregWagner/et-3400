@@ -2,16 +2,14 @@
 #include "../common/util.h"
 #include <QMessageBox>
 
-DeviceDialog::DeviceDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+DeviceDialog::DeviceDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
 
     setFixedSize(QSize(350, 350));
     setWindowTitle("Add Device");
 }
 
-void DeviceDialog::setupUi(QDialog *Dialog)
-{
+void DeviceDialog::setupUi(QDialog *Dialog) {
     mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(10);
     mainLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
@@ -55,11 +53,11 @@ void DeviceDialog::setupUi(QDialog *Dialog)
     address_edit->setValidator(new QRegularExpressionValidator(QRegularExpression("[01Xx ]*"), address_edit));
     gridLayout->addWidget(address_edit, 1, 1, 1, 1);
 
-    connect(address_edit, &QLineEdit::textChanged, this, [this](const QString &text)
-            {
-                BitPattern bp = parse_pattern(text.toUtf8().constData());
-                start_value->setText(toHex(bp.start));
-                end_value->setText(toHex(bp.end)); });
+    connect(address_edit, &QLineEdit::textChanged, this, [this](const QString &text) {
+        BitPattern bp = parse_pattern(text.toUtf8().constData());
+        start_value->setText(toHex(bp.start));
+        end_value->setText(toHex(bp.end));
+    });
 
     description_label = new QLabel(this);
     description_label->setWordWrap(true);
@@ -109,25 +107,21 @@ void DeviceDialog::setupUi(QDialog *Dialog)
     connect(buttonBox, &QDialogButtonBox::rejected, this, &DeviceDialog::reject);
 
     QMetaObject::connectSlotsByName(Dialog);
-
 } // setupUi
 
-void DeviceDialog::retranslateUi(QDialog *Dialog)
-{
+void DeviceDialog::retranslateUi(QDialog *Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
 
     name_label->setText(QApplication::translate("Dialog", "Name", nullptr));
     address_label->setText(QApplication::translate("Dialog", "Address Pattern", nullptr));
     start_label->setText(QApplication::translate("Dialog", "Start", nullptr));
     end_label->setText(QApplication::translate("Dialog", "End", nullptr));
-    description_label->setText(QApplication::translate("Dialog", "16-bit address bit pattern:\n\n0 - Active Low\n1 - Active High\nX - Don't Care", nullptr));
-
+    description_label->setText(QApplication::translate(
+        "Dialog", "16-bit address bit pattern:\n\n0 - Active Low\n1 - Active High\nX - Don't Care", nullptr));
 } // retranslateUi
 
-void DeviceDialog::setDeviceInfo(DeviceInfo info, DeviceDialogMode mode)
-{
-    if (mode == DeviceDialogMode::EditDevice)
-    {
+void DeviceDialog::setDeviceInfo(DeviceInfo info, DeviceDialogMode mode) {
+    if (mode == DeviceDialogMode::EditDevice) {
         setWindowTitle("Edit Device");
     }
 
@@ -139,8 +133,7 @@ void DeviceDialog::setDeviceInfo(DeviceInfo info, DeviceDialogMode mode)
         pattern.insert(i, ' ');
 
     address_edit->setText(pattern);
-    if (mode == DeviceDialogMode::AddDevice)
-    {
+    if (mode == DeviceDialogMode::AddDevice) {
         BitPattern bp = parse_pattern(address_edit->text().toUtf8().constData());
         info.bit_pattern.start = bp.start;
         info.bit_pattern.end = bp.end;
@@ -153,38 +146,36 @@ void DeviceDialog::setDeviceInfo(DeviceInfo info, DeviceDialogMode mode)
     name_edit->setSelection(0, info.name.length());
 }
 
-void DeviceDialog::validate()
-{
+void DeviceDialog::validate() {
     bool ok1;
     bool ok2;
 
     ok1 = is_pattern_valid(address_edit->text().toUtf8().constData());
 
-    if (ok1)
-    {
+    if (ok1) {
         BitPattern bp = parse_pattern(address_edit->text().toUtf8().constData());
         ok2 = !has_collision(bp.start, bp.end);
 
-        if (!ok2)
-        {
-            QMessageBox::critical(this, "Address Mapping Error", "The start and end addresses overlap with an existing device.", QMessageBox::StandardButton::Ok);
+        if (!ok2) {
+            QMessageBox::critical(this, "Address Mapping Error",
+                                  "The start and end addresses overlap with an existing device.",
+                                  QMessageBox::StandardButton::Ok);
         }
-    }
-    else
-    {
-        QMessageBox::critical(this, "Address Mapping Error", "The address pattern is invalid or incomplete.", QMessageBox::StandardButton::Ok);
+    } else {
+        QMessageBox::critical(this, "Address Mapping Error", "The address pattern is invalid or incomplete.",
+                              QMessageBox::StandardButton::Ok);
     }
 
-    if (ok1 && ok2)
-    {
+    if (ok1 && ok2) {
         accept();
     }
 }
 
-DeviceInfo DeviceDialog::getDeviceInfo()
-{
+DeviceInfo DeviceDialog::getDeviceInfo() {
     BitPattern bp = parse_pattern(address_edit->text().toUtf8().constData());
 
-    return DeviceInfo({name_edit->text(),
-                       bp});
+    return DeviceInfo({
+        name_edit->text(),
+        bp
+    });
 }

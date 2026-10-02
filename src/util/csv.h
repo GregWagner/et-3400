@@ -6,6 +6,6 @@
 #include <QTextStream>
 #include <vector>
 
-bool readCSVRow(QTextStream &in, QStringList *row);
+bool readCSVRow(QTextStream & in, QStringList * row);
 
 #endif // CSV_H

@@ -9,8 +9,7 @@
 
 #include <windows.h>
 
-void gotoxy(int x, int y)
-{
+void gotoxy(int x, int y) {
     COORD p = {x, y};
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), p);
 }
@@ -20,8 +19,7 @@ void gotoxy(int x, int y)
 #include <unistd.h>
 #include <term.h>
 
-void gotoxy(int x, int y)
-{
+void gotoxy(int x, int y) {
     int err;
     if (!cur_term)
         if (setupterm(NULL, STDOUT_FILENO, &err) == ERR)
@@ -33,9 +31,8 @@ void gotoxy(int x, int y)
 
 et3400emu *emu;
 
-void render_memory(et3400emu *emu);
+void render_memory(et3400emu * emu);
 
-void sigintHandler(int sig_num)
-{
+void sigintHandler(int sig_num) {
     emu->stop();
 }

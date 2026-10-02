@@ -6,16 +6,17 @@
 #include <QMenu>
 #include "../common/util.h"
 
-LabelsDialog::LabelsDialog(DebuggerDialog *debugger) : QDialog(debugger, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint)
-{
+LabelsDialog::LabelsDialog(DebuggerDialog *debugger) : QDialog(
+    debugger,
+    Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint) {
     this->debugger = debugger;
     setupUi();
 }
 
-LabelsDialog::~LabelsDialog() {}
+LabelsDialog::~LabelsDialog() {
+}
 
-void LabelsDialog::setupUi()
-{
+void LabelsDialog::setupUi() {
     this->setWindowTitle("Labels");
     this->resize(600, 400);
 
@@ -28,9 +29,9 @@ void LabelsDialog::setupUi()
 
     QAction *add_action = toolbar->addAction(QIcon(":/buttons/Add.png"), "Add");
     edit_action = toolbar->addAction(QIcon(":/buttons/Edit.png"), "Edit");
-	edit_action->setShortcut(Qt::Key_F2);
+    edit_action->setShortcut(Qt::Key_F2);
     remove_action = toolbar->addAction(QIcon(":/buttons/Remove.png"), "Remove");
-	remove_action->setShortcut(Qt::Key_Delete);
+    remove_action->setShortcut(Qt::Key_Delete);
 
     edit_action->setEnabled(false);
     remove_action->setEnabled(false);
@@ -63,35 +64,29 @@ void LabelsDialog::setupUi()
     connect(add_action, &QAction::triggered, this, &LabelsDialog::add_label);
     connect(edit_action, &QAction::triggered, this, &LabelsDialog::edit_label);
     connect(remove_action, &QAction::triggered, this, &LabelsDialog::delete_label);
-    connect(tab_goto_label_action, &QAction::triggered, this, [this]()
-            { this->debugger->goto_label(); });
-    connect(load_labels_action, &QAction::triggered, this, [this]()
-            { this->load_labels(); });
-    connect(save_labels_action, &QAction::triggered, this, [this]()
-            { this->save_labels(); });
-    connect(load_default_labels_action, &QAction::triggered, this, [this]()
-            { this->debugger->load_default_labels(); });
+    connect(tab_goto_label_action, &QAction::triggered, this, [this]() { this->debugger->goto_label(); });
+    connect(load_labels_action, &QAction::triggered, this, [this]() { this->load_labels(); });
+    connect(save_labels_action, &QAction::triggered, this, [this]() { this->save_labels(); });
+    connect(load_default_labels_action, &QAction::triggered, this, [this]() { this->debugger->load_default_labels(); });
     connect(tab_clear_ram_labels_action, &QAction::triggered, this, &LabelsDialog::clear_labels);
     connect(labels_table, &QTableWidget::itemSelectionChanged, this, &LabelsDialog::table_selection_changed);
     connect(labels_table, &QTableWidget::cellDoubleClicked, this, &LabelsDialog::goto_label);
 
     labels_table->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(labels_table, &QTableWidget::customContextMenuRequested, this, [this](const QPoint &pos)
-            {
+    connect(labels_table, &QTableWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
         if (labels_table->selectedItems().isEmpty())
             return;
         QMenu menu(this);
         menu.addAction(edit_action);
         menu.addAction(remove_action);
-        menu.exec(labels_table->viewport()->mapToGlobal(pos)); });
+        menu.exec(labels_table->viewport()->mapToGlobal(pos));
+    });
 }
 
-void LabelsDialog::retranslateUi()
-{
+void LabelsDialog::retranslateUi() {
 }
 
-void LabelsDialog::populate_labels_table()
-{
+void LabelsDialog::populate_labels_table() {
     if (!labels_table || !debugger->emu_ptr)
         return;
 
@@ -101,10 +96,9 @@ void LabelsDialog::populate_labels_table()
 
     auto *all_labels = debugger->emu_ptr->labels->getLabels();
 
-    for (int i = 0; i < (int)all_labels->size(); i++)
-    {
+    for (int i = 0; i < (int) all_labels->size(); i++) {
         const Label &label = all_labels->at(i);
-        if (device && (label.start < (uint32_t)device->get_start() || label.start > (uint32_t)device->get_end()))
+        if (device && (label.start < (uint32_t) device->get_start() || label.start > (uint32_t) device->get_end()))
             continue;
         int row = labels_table->rowCount();
         labels_table->insertRow(row);
@@ -113,35 +107,32 @@ void LabelsDialog::populate_labels_table()
         labels_table->setItem(row, 0, start_item);
         labels_table->setItem(row, 1, new QTableWidgetItem(toHex(label.end)));
         QString type_str;
-        switch (label.type)
-        {
-        case LabelType::COMMENT:
-            type_str = "Comment";
-            break;
-        case LabelType::DATA:
-            type_str = "Data";
-            break;
-        case LabelType::ASSEMBLY:
-            type_str = "Assembly";
-            break;
-        case LabelType::LABEL_ERROR:
-            type_str = "Error";
-            break;
+        switch (label.type) {
+            case LabelType::COMMENT:
+                type_str = "Comment";
+                break;
+            case LabelType::DATA:
+                type_str = "Data";
+                break;
+            case LabelType::ASSEMBLY:
+                type_str = "Assembly";
+                break;
+            case LabelType::LABEL_ERROR:
+                type_str = "Error";
+                break;
         }
         labels_table->setItem(row, 2, new QTableWidgetItem(type_str));
         labels_table->setItem(row, 3, new QTableWidgetItem(label.comment));
     }
 }
 
-void LabelsDialog::table_selection_changed()
-{
+void LabelsDialog::table_selection_changed() {
     bool has_selection = !labels_table->selectedItems().isEmpty();
     edit_action->setEnabled(has_selection);
     remove_action->setEnabled(has_selection);
 }
 
-void LabelsDialog::goto_label()
-{
+void LabelsDialog::goto_label() {
     int row = labels_table->currentRow();
     if (row < 0)
         return;
@@ -150,7 +141,7 @@ void LabelsDialog::goto_label()
 
     auto *labels = debugger->emu_ptr->labels->getLabels();
 
-    if (idx >= (int)labels->size())
+    if (idx >= (int) labels->size())
         return;
 
     offs_t address = labels->at(idx).start;
@@ -158,15 +149,14 @@ void LabelsDialog::goto_label()
     debugger->goto_address(address);
 }
 
-void LabelsDialog::add_label()
-{
+void LabelsDialog::add_label() {
     LabelDialog labelDialog;
-    labelDialog.hasCollision = [this](Label *label, offs_t start, offs_t end)
-    { return debugger->emu_ptr->labels->hasCollision(label, start, end); };
+    labelDialog.hasCollision = [this](Label *label, offs_t start, offs_t end) {
+        return debugger->emu_ptr->labels->hasCollision(label, start, end);
+    };
     labelDialog.addLabel("", 0);
 
-    if (labelDialog.exec() == QDialog::Accepted)
-    {
+    if (labelDialog.exec() == QDialog::Accepted) {
         LabelInfo info = labelDialog.getLabel();
 
         debugger->emu_ptr->labels->addLabel(Label{info.start, info.end, info.type, info.text});
@@ -175,25 +165,24 @@ void LabelsDialog::add_label()
     }
 }
 
-void LabelsDialog::edit_label()
-{
+void LabelsDialog::edit_label() {
     int row = labels_table->currentRow();
     if (row < 0)
         return;
 
     int idx = labels_table->item(row, 0)->data(Qt::UserRole).toInt();
     auto *labels = debugger->emu_ptr->labels->getLabels();
-    if (idx >= (int)labels->size())
+    if (idx >= (int) labels->size())
         return;
 
     Label label = labels->at(idx);
     LabelDialog labelDialog;
-    labelDialog.hasCollision = [this](Label *label, offs_t start, offs_t end)
-    { return debugger->emu_ptr->labels->hasCollision(label, start, end); };
+    labelDialog.hasCollision = [this](Label *label, offs_t start, offs_t end) {
+        return debugger->emu_ptr->labels->hasCollision(label, start, end);
+    };
     labelDialog.editLabel(&label);
 
-    if (labelDialog.exec() == QDialog::Accepted)
-    {
+    if (labelDialog.exec() == QDialog::Accepted) {
         LabelInfo info = labelDialog.getLabel();
         label.comment = info.text;
         label.type = info.type;
@@ -204,15 +193,14 @@ void LabelsDialog::edit_label()
     }
 }
 
-void LabelsDialog::delete_label()
-{
+void LabelsDialog::delete_label() {
     int row = labels_table->currentRow();
     if (row < 0)
         return;
 
     int idx = labels_table->item(row, 0)->data(Qt::UserRole).toInt();
     auto *labels = debugger->emu_ptr->labels->getLabels();
-    if (idx >= (int)labels->size())
+    if (idx >= (int) labels->size())
         return;
 
     debugger->emu_ptr->labels->removeLabel(&labels->at(idx));
@@ -220,8 +208,7 @@ void LabelsDialog::delete_label()
     debugger->reset_disassembly_view();
 }
 
-void LabelsDialog::load_default_labels()
-{
+void LabelsDialog::load_default_labels() {
     memory_mapped_device *device = debugger->get_disassembly_device();
 
     if (!device)
@@ -237,7 +224,8 @@ void LabelsDialog::load_default_labels()
         return;
 
     auto reply = QMessageBox::question(this, "Load Default Labels",
-                                       QString("Clear existing labels and load defaults for %1?").arg(QString::fromStdString(device->name)));
+                                       QString("Clear existing labels and load defaults for %1?").arg(
+                                           QString::fromStdString(device->name)));
     if (reply != QMessageBox::Yes)
         return;
 
@@ -247,8 +235,7 @@ void LabelsDialog::load_default_labels()
     populate_labels_table();
 }
 
-void LabelsDialog::clear_labels()
-{
+void LabelsDialog::clear_labels() {
     memory_mapped_device *device = debugger->get_disassembly_device();
 
     if (!device)
@@ -264,19 +251,19 @@ void LabelsDialog::clear_labels()
     populate_labels_table();
 }
 
-void LabelsDialog::load_labels()
-{
+void LabelsDialog::load_labels() {
     memory_mapped_device *device = debugger->get_disassembly_device();
 
-    File::load_labels_dialog(this, debugger->emu_ptr, device->get_start(), device->get_end(), debugger->get_settings()->labelsDir);
+    File::load_labels_dialog(this, debugger->emu_ptr, device->get_start(), device->get_end(),
+                             debugger->get_settings()->labelsDir);
 
     debugger->reset_disassembly_view();
     populate_labels_table();
 }
 
-void LabelsDialog::save_labels()
-{
+void LabelsDialog::save_labels() {
     memory_mapped_device *device = debugger->get_disassembly_device();
 
-    File::save_labels_dialog(this, debugger->emu_ptr, device->get_start(), device->get_end(), debugger->get_settings()->labelsDir);
+    File::save_labels_dialog(this, debugger->emu_ptr, device->get_start(), device->get_end(),
+                             debugger->get_settings()->labelsDir);
 }

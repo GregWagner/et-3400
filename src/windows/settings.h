@@ -19,37 +19,40 @@
 #include <QDialogButtonBox>
 #include "../util/settings.h"
 
-static QString format(int i)
-{
-    if (i >= 1000000)
-    {
-        return QString("%1 MHz").arg(i / (float)1000000);
-    }
-    else if (i > 1000)
-    {
-        return QString("%1 kHz").arg(i / (float)1000);
+static QString format(int i) {
+    if (i >= 1000000) {
+        return QString("%1 MHz").arg(i / (float) 1000000);
+    } else if (i > 1000) {
+        return QString("%1 kHz").arg(i / (float) 1000);
     }
     return QString("%1 Hz").arg(i);
 }
 
-class SettingsDialog : public QDialog
-{
+class SettingsDialog : public QDialog {
     Q_OBJECT
 
 public:
     SettingsDialog();
+
     SettingsDialog(QWidget *parent);
+
     void set_emulator(et3400emu *emu);
+
     void set_settings(Settings *settings);
 
-signals:
+    signals:
     // void valueChanged(int value);
 
-public slots:
+public
+    slots:
+
+
     void setClockRateValue(int value);
+
     void resetClockRate();
 
-private slots:
+private
+    slots:
     // void onFreqInputChanged();
     // void onUnitChanged(int index);
 
@@ -75,16 +78,23 @@ private:
     int multiplier = 1;
 
     void setHz();
+
     void setkHz();
+
     void setMHz();
+
     void setClockRate(int value);
 
     QWidget *createTabs();
+
     QWidget *createClockRateTab();
+
     QWidget *createGeneralTab();
+
     QWidget *createDisplayTab();
 
     void setupUi(QDialog *Dialog);
+
     void retranslateUi(QDialog *Dialog);
 };
 

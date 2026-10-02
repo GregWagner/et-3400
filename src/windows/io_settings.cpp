@@ -2,16 +2,15 @@
 #include "../common/util.h"
 #include <QMessageBox>
 
-IOSettingsDialog::IOSettingsDialog(QWidget *parent) : QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+IOSettingsDialog::IOSettingsDialog(QWidget *parent) : QDialog(
+    parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
 
     setFixedSize(QSize(350, 220));
     setWindowTitle("I/O Settings");
 }
 
-void IOSettingsDialog::setupUi(QDialog *Dialog)
-{
+void IOSettingsDialog::setupUi(QDialog *Dialog) {
     mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(10);
     mainLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
@@ -71,20 +70,18 @@ void IOSettingsDialog::setupUi(QDialog *Dialog)
     connect(buttonBox, &QDialogButtonBox::rejected, this, &IOSettingsDialog::reject);
 
     QMetaObject::connectSlotsByName(Dialog);
-
 } // setupUi
 
-void IOSettingsDialog::retranslateUi(QDialog *Dialog)
-{
-    (void)Dialog;
+void IOSettingsDialog::retranslateUi(QDialog *Dialog) {
+    (void) Dialog;
     led_label->setText(QApplication::translate("Dialog", "LED Address", nullptr));
     dip_label->setText(QApplication::translate("Dialog", "DIP Address", nullptr));
-    description_label->setText(QApplication::translate("Dialog", "Each array occupies a single byte. The LED array is write-only, the DIP array is read-only.", nullptr));
-
+    description_label->setText(QApplication::translate(
+        "Dialog", "Each array occupies a single byte. The LED array is write-only, the DIP array is read-only.",
+        nullptr));
 } // retranslateUi
 
-void IOSettingsDialog::setIOSettings(IOSettingsInfo info)
-{
+void IOSettingsDialog::setIOSettings(IOSettingsInfo info) {
     led_edit->setText(toHex(info.led_address));
     dip_edit->setText(toHex(info.dip_address));
 
@@ -92,49 +89,47 @@ void IOSettingsDialog::setIOSettings(IOSettingsInfo info)
     led_edit->setSelection(0, led_edit->text().length());
 }
 
-IOSettingsInfo IOSettingsDialog::getIOSettings()
-{
+IOSettingsInfo IOSettingsDialog::getIOSettings() {
     bool ok;
 
-    return IOSettingsInfo({(offs_t)toInt(led_edit, ok),
-                           (offs_t)toInt(dip_edit, ok)});
+    return IOSettingsInfo({
+        (offs_t) toInt(led_edit, ok),
+        (offs_t) toInt(dip_edit, ok)
+    });
 }
 
-void IOSettingsDialog::validate()
-{
+void IOSettingsDialog::validate() {
     bool ok1;
     bool ok2;
 
     int led_address = toInt(led_edit, ok1);
     int dip_address = toInt(dip_edit, ok2);
 
-    if (!ok1 || !ok2)
-    {
+    if (!ok1 || !ok2) {
         QMessageBox::critical(this, "I/O Settings Error", "Invalid address", QMessageBox::Ok);
         return;
     }
 
-    if (led_address < 0 || led_address > 0xFFFF || dip_address < 0 || dip_address > 0xFFFF)
-    {
+    if (led_address < 0 || led_address > 0xFFFF || dip_address < 0 || dip_address > 0xFFFF) {
         QMessageBox::critical(this, "I/O Settings Error", "Address is out of bounds", QMessageBox::Ok);
         return;
     }
 
-    if (led_address == dip_address)
-    {
-        QMessageBox::critical(this, "I/O Settings Error", "The LED and DIP arrays cannot share the same address.", QMessageBox::Ok);
+    if (led_address == dip_address) {
+        QMessageBox::critical(this, "I/O Settings Error", "The LED and DIP arrays cannot share the same address.",
+                              QMessageBox::Ok);
         return;
     }
 
-    if (address_in_use && address_in_use(led_address))
-    {
-        QMessageBox::critical(this, "I/O Settings Error", "The LED address overlaps with an existing device.", QMessageBox::Ok);
+    if (address_in_use &&address_in_use(led_address)) {
+        QMessageBox::critical(this, "I/O Settings Error", "The LED address overlaps with an existing device.",
+                              QMessageBox::Ok);
         return;
     }
 
-    if (address_in_use && address_in_use(dip_address))
-    {
-        QMessageBox::critical(this, "I/O Settings Error", "The DIP address overlaps with an existing device.", QMessageBox::Ok);
+    if (address_in_use &&address_in_use(dip_address)) {
+        QMessageBox::critical(this, "I/O Settings Error", "The DIP address overlaps with an existing device.",
+                              QMessageBox::Ok);
         return;
     }
 

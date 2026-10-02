@@ -2,19 +2,17 @@
 #include "../common/default.h"
 #include "../util/log.h"
 
-SettingsDialog::SettingsDialog()
-{
+SettingsDialog::SettingsDialog() {
 }
 
-SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(
+    parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     // setFixedSize(QSize(350, 250));
 
     setupUi(this);
 }
 
-QWidget *SettingsDialog::createTabs()
-{
+QWidget *SettingsDialog::createTabs() {
     QTabWidget *tabs = new QTabWidget(this);
     tabs->addTab(createClockRateTab(), "Clock Rate");
     tabs->addTab(createGeneralTab(), "General");
@@ -22,8 +20,7 @@ QWidget *SettingsDialog::createTabs()
     return tabs;
 }
 
-QWidget *SettingsDialog::createClockRateTab()
-{
+QWidget *SettingsDialog::createClockRateTab() {
     QWidget *tab = new QWidget();
     QVBoxLayout *verticalLayout = new QVBoxLayout(tab);
 
@@ -61,7 +58,9 @@ QWidget *SettingsDialog::createClockRateTab()
     clock_rate_label->setAlignment(Qt::AlignCenter);
     clock_rate_label->setFixedHeight(24);
 
-    warning_label = new QLabel("The ROM key press routine scans the keypad and waits to eliminate contact bouncing on a real ET-3400. Setting the clock rate below 200kHz will affect keypad response, requiring you to hold down (and release between key presses) the buttons for slightly longer.", tab);
+    warning_label = new QLabel(
+        "The ROM key press routine scans the keypad and waits to eliminate contact bouncing on a real ET-3400. Setting the clock rate below 200kHz will affect keypad response, requiring you to hold down (and release between key presses) the buttons for slightly longer.",
+        tab);
     warning_label->setWordWrap(true);
     warning_label->hide();
 
@@ -91,8 +90,7 @@ QWidget *SettingsDialog::createClockRateTab()
     return tab;
 }
 
-QWidget *SettingsDialog::createGeneralTab()
-{
+QWidget *SettingsDialog::createGeneralTab() {
     QWidget *tab = new QWidget();
     QVBoxLayout *verticalLayout = new QVBoxLayout(tab);
 
@@ -107,20 +105,21 @@ QWidget *SettingsDialog::createGeneralTab()
     verticalLayout->addWidget(clear_ram_label);
     verticalLayout->addStretch();
 
-    connect(clear_ram_checkbox, &QCheckBox::toggled, [this](bool checked)
-            { settings->clearRamOnLoad = checked; });
+    connect(clear_ram_checkbox, &QCheckBox::toggled, [this](bool checked) { settings->clearRamOnLoad = checked; });
 
     return tab;
 }
 
-QWidget *SettingsDialog::createDisplayTab()
-{
+QWidget *SettingsDialog::createDisplayTab() {
     QWidget *tab = new QWidget();
     QVBoxLayout *verticalLayout = new QVBoxLayout(tab);
 
     QHBoxLayout *horizontalLayout = new QHBoxLayout();
-    show_bit0_display_writes_checkbox = new QCheckBox("Only show writes to bit 0 for display addresses in the memory pane", tab);
-    QLabel *show_bit0_label = new QLabel("Display latches are only connected to bit 0 of the data bus. Enabling this option will cause the memory pane to show only writes to bit 0", tab);
+    show_bit0_display_writes_checkbox = new QCheckBox(
+        "Only show writes to bit 0 for display addresses in the memory pane", tab);
+    QLabel *show_bit0_label = new QLabel(
+        "Display latches are only connected to bit 0 of the data bus. Enabling this option will cause the memory pane to show only writes to bit 0",
+        tab);
     show_bit0_label->setWordWrap(true);
 
     horizontalLayout->addWidget(show_bit0_display_writes_checkbox);
@@ -129,14 +128,14 @@ QWidget *SettingsDialog::createDisplayTab()
     verticalLayout->addWidget(show_bit0_label);
     verticalLayout->addStretch();
 
-    connect(show_bit0_display_writes_checkbox, &QCheckBox::toggled, [this](bool checked)
-            { settings->showBit0DisplayWrites = checked; });
+    connect(show_bit0_display_writes_checkbox, &QCheckBox::toggled, [this](bool checked) {
+        settings->showBit0DisplayWrites = checked;
+    });
 
     return tab;
 }
 
-void SettingsDialog::setupUi(QDialog *Dialog)
-{
+void SettingsDialog::setupUi(QDialog *Dialog) {
     if (Dialog->objectName().isEmpty())
         Dialog->setObjectName(QStringLiteral("Settings"));
 
@@ -163,19 +162,16 @@ void SettingsDialog::setupUi(QDialog *Dialog)
     QMetaObject::connectSlotsByName(Dialog);
 
     setWindowTitle("Settings");
-
 } // setupUi
 
-void SettingsDialog::retranslateUi(QDialog *Dialog)
-{
+void SettingsDialog::retranslateUi(QDialog *Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
     radioButton_Hz->setText(QApplication::translate("Dialog", "Hz", nullptr));
     radioButton_kHz->setText(QApplication::translate("Dialog", "kHz", nullptr));
     radioButton_MHz->setText(QApplication::translate("Dialog", "MHz", nullptr));
 } // retranslateUi
 
-void SettingsDialog::setHz()
-{
+void SettingsDialog::setHz() {
     multiplier = 1;
 
     horizontalSlider->setTickInterval(50);
@@ -184,8 +180,7 @@ void SettingsDialog::setHz()
     horizontalSlider->setMaximum(999);
 }
 
-void SettingsDialog::setkHz()
-{
+void SettingsDialog::setkHz() {
     multiplier = 1000;
 
     horizontalSlider->setTickInterval(50);
@@ -194,8 +189,7 @@ void SettingsDialog::setkHz()
     horizontalSlider->setMaximum(999);
 }
 
-void SettingsDialog::setMHz()
-{
+void SettingsDialog::setMHz() {
     multiplier = 1000000;
 
     horizontalSlider->setTickInterval(1);
@@ -204,24 +198,20 @@ void SettingsDialog::setMHz()
     horizontalSlider->setMaximum(4);
 }
 
-void SettingsDialog::resetClockRate()
-{
+void SettingsDialog::resetClockRate() {
     setClockRate(DEFAULT_CLOCK_RATE);
 }
 
-void SettingsDialog::setClockRateValue(int value)
-{
+void SettingsDialog::setClockRateValue(int value) {
     int clock_rate = multiplier * value;
 
     setClockRate(clock_rate);
 }
 
-void SettingsDialog::setClockRate(int clock_rate)
-{
+void SettingsDialog::setClockRate(int clock_rate) {
     clock_rate_label->setText(QString("Clock Rate (%1)").arg(format(clock_rate)));
 
-    if (clock_rate < 1000)
-    {
+    if (clock_rate < 1000) {
         multiplier = 1;
         radioButton_Hz->setChecked(true);
 
@@ -229,9 +219,7 @@ void SettingsDialog::setClockRate(int clock_rate)
         horizontalSlider->setSingleStep(1);
         horizontalSlider->setMinimum(1);
         horizontalSlider->setMaximum(999);
-    }
-    else if (clock_rate < 1000000)
-    {
+    } else if (clock_rate < 1000000) {
         multiplier = 1000;
         radioButton_kHz->setChecked(true);
 
@@ -239,9 +227,7 @@ void SettingsDialog::setClockRate(int clock_rate)
         horizontalSlider->setSingleStep(1);
         horizontalSlider->setMinimum(1);
         horizontalSlider->setMaximum(999);
-    }
-    else
-    {
+    } else {
         multiplier = 1000000;
         radioButton_MHz->setChecked(true);
 
@@ -253,12 +239,9 @@ void SettingsDialog::setClockRate(int clock_rate)
 
     horizontalSlider->setValue(clock_rate / multiplier);
 
-    if (clock_rate < 200000)
-    {
+    if (clock_rate < 200000) {
         warning_label->show();
-    }
-    else
-    {
+    } else {
         warning_label->hide();
     }
 
@@ -267,8 +250,7 @@ void SettingsDialog::setClockRate(int clock_rate)
     settings->clockRate = clock_rate;
 }
 
-void SettingsDialog::set_emulator(et3400emu *emu)
-{
+void SettingsDialog::set_emulator(et3400emu *emu) {
     emu_ptr = emu;
 
     int clock_rate = emu_ptr->get_clock_rate();
@@ -276,8 +258,7 @@ void SettingsDialog::set_emulator(et3400emu *emu)
     setClockRate(clock_rate);
 }
 
-void SettingsDialog::set_settings(Settings *settings)
-{
+void SettingsDialog::set_settings(Settings *settings) {
     this->settings = settings;
     clear_ram_checkbox->setChecked(settings->clearRamOnLoad);
     show_bit0_display_writes_checkbox->setChecked(settings->showBit0DisplayWrites);

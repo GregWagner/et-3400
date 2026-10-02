@@ -7,16 +7,14 @@
 #include "../dasm/disassembler.h"
 #include <QString>
 
-enum DisassemblyType
-{
+enum DisassemblyType {
     Comment,
     Assembly,
     Data,
     Empty
 };
 
-struct DisassemblyLine
-{
+struct DisassemblyLine {
     offs_t address;
     DisassemblyType type;
     QString opcodes;
@@ -26,14 +24,18 @@ struct DisassemblyLine
     int bytes;
 };
 
-class DisassemblyBuilder
-{
+class DisassemblyBuilder {
 public:
-    static void build(std::vector<DisassemblyLine> *lines, offs_t start, offs_t end, uint8_t *memory, std::vector<Label> *labels);
+    static void build(std::vector<DisassemblyLine> *lines, offs_t start, offs_t end, uint8_t *memory,
+                      std::vector<Label> *labels);
 
 private:
-    static void disassemble(std::vector<DisassemblyLine> *lines, uint8_t *memory, int &ptr, offs_t &address, Label *label);
-    static bool try_disassemble(std::vector<DisassemblyLine> *lines, uint8_t *memory, int &ptr, offs_t &address, Label *label);
+    static void disassemble(std::vector<DisassemblyLine> *lines, uint8_t *memory, int &ptr, offs_t &address,
+                            Label *label);
+
+    static bool try_disassemble(std::vector<DisassemblyLine> *lines, uint8_t *memory, int &ptr, offs_t &address,
+                                Label *label);
+
     static bool check_label_conflict(uint8_t *memory, int ptr, offs_t address, Label *label);
 };
 

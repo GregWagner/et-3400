@@ -15,46 +15,54 @@
 #include "../emu/et3400.h"
 #include "../common/common_defs.h"
 
-class RegisterView : public QFrame
-{
+class RegisterView : public QFrame {
     Q_OBJECT
 
 public:
-    enum RegisterType
-    {
+    enum RegisterType {
         BYTE,
         WORD,
         FLAGS,
     };
 
     RegisterView(RegisterType type, QWidget *parent = nullptr);
+
     ~RegisterView();
 
     void showContextMenu(const QPoint &pos);
 
     void set_value(uint16_t value);
+
     void start_editing();
+
     void stop_editing();
-    void set_enabled(bool enabled)
-    {
+
+    void set_enabled(bool enabled) {
         this->enabled = enabled;
-        if (!enabled)
-        {
+        if (!enabled) {
             stop_editing();
         }
         update();
     }
 
-signals:
+    signals:
+
+
     void on_value_changed(uint16_t new_value);
+
     void on_edit_abort(int reason);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+
     void keyPressEvent(QKeyEvent *event) override;
+
     void mousePressEvent(QMouseEvent *event) override;
+
     void mouseDoubleClickEvent(QMouseEvent *event) override;
+
     void focusInEvent(QFocusEvent *event) override;
+
     void focusOutEvent(QFocusEvent *event) override;
 
 private:
@@ -66,6 +74,7 @@ private:
     uint16_t value;
 
     int item_height;
+
     void bufferDraw();
 
     QPixmap *buffer;

@@ -8,21 +8,28 @@
 #include "../util/breakpoint_manager.h"
 #include "custom_dev.h"
 
-class MemoryMapManager
-{
+class MemoryMapManager {
 public:
     MemoryMapManager();
+
     ~MemoryMapManager();
 
     void map(memory_mapped_device *device);
+
     void unmap(memory_mapped_device *device);
+
     memory_mapped_device *get_block_device(off_t address);
+
     memory_mapped_device *try_get_block_device(std::string device_name);
+
     std::vector<memory_mapped_device *> get_block_devices();
+
     std::vector<custom_device *> get_custom_devices();
+
     bool has_collision(offs_t start, offs_t end, memory_mapped_device *exclude = nullptr);
 
     uint8_t read(offs_t addr);
+
     void write(offs_t addr, uint8_t data);
 
 private:

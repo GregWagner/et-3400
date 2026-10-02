@@ -2,16 +2,14 @@
 #include "../common/util.h"
 #include <QMessageBox>
 
-LabelDialog::LabelDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+LabelDialog::LabelDialog() : QDialog(0, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
 
     setFixedSize(QSize(350, 250));
     setWindowTitle("Add Label");
 }
 
-void LabelDialog::setupUi(QDialog *Dialog)
-{
+void LabelDialog::setupUi(QDialog *Dialog) {
     mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(10);
     mainLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
@@ -112,11 +110,9 @@ void LabelDialog::setupUi(QDialog *Dialog)
     QMetaObject::connectSlotsByName(Dialog);
 
     comment_radio->setChecked(true);
-
 } // setupUi
 
-void LabelDialog::set_comment(bool checked)
-{
+void LabelDialog::set_comment(bool checked) {
     start_label->setText(QApplication::translate("Dialog", "Address", nullptr));
     end_label->setText(QApplication::translate("Dialog", "End", nullptr));
     end_label->setVisible(false);
@@ -124,16 +120,14 @@ void LabelDialog::set_comment(bool checked)
     description_label->setText("Add a comment at the specified address. This does not affect disassembly.");
 }
 
-void LabelDialog::set_data(bool checked)
-{
+void LabelDialog::set_data(bool checked) {
     start_label->setText(QApplication::translate("Dialog", "Start", nullptr));
     end_label->setVisible(true);
     end_edit->setVisible(true);
     description_label->setText("Mark the range as data, preventing the disassembler from processing it as code");
 }
 
-void LabelDialog::retranslateUi(QDialog *Dialog)
-{
+void LabelDialog::retranslateUi(QDialog *Dialog) {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
 
     comment_radio->setText(QApplication::translate("Dialog", "Comment", nullptr));
@@ -142,11 +136,9 @@ void LabelDialog::retranslateUi(QDialog *Dialog)
     start_label->setText(QApplication::translate("Dialog", "Start", nullptr));
     end_label->setText(QApplication::translate("Dialog", "End", nullptr));
     text_label->setText(QApplication::translate("Dialog", "Text", nullptr));
-
 } // retranslateUi
 
-void LabelDialog::addLabel(QString text, offs_t address)
-{
+void LabelDialog::addLabel(QString text, offs_t address) {
     set_comment();
 
     text_edit->setText(text);
@@ -163,14 +155,10 @@ void LabelDialog::addLabel(QString text, offs_t address)
     ref_label = nullptr;
 }
 
-void LabelDialog::editLabel(Label *label)
-{
-    if (label->type == LabelType::DATA)
-    {
+void LabelDialog::editLabel(Label *label) {
+    if (label->type == LabelType::DATA) {
         set_data();
-    }
-    else
-    {
+    } else {
         set_comment();
     }
 
@@ -218,70 +206,61 @@ void LabelDialog::editLabel(Label *label)
 //     text_edit->setSelection(0, label.text.length());
 // }
 
-void LabelDialog::validate()
-{
+void LabelDialog::validate() {
     bool ok1 = true;
     bool ok2 = true;
 
     int start = toInt(start_edit, ok1);
     int end = start;
 
-    if (data_radio->isChecked())
-    {
+    if (data_radio->isChecked()) {
         end = toInt(end_edit, ok2);
     }
 
-    if (text_edit->text().length() == 0)
-    {
+    if (text_edit->text().length() == 0) {
         QMessageBox::critical(this, "Label Error", "Label text cannot be empty", QMessageBox::Ok);
         return;
     }
 
-    if (!ok1 || !ok2)
-    {
+    if (!ok1 || !ok2) {
         QMessageBox::critical(this, "Label Error", "Invalid address", QMessageBox::Ok);
         return;
     }
 
-    if (end < start)
-    {
+    if (end < start) {
         QMessageBox::critical(this, "Label Error", "The specified address range is invalid", QMessageBox::Ok);
         return;
     }
 
-    if (start > 0xFFFF || end > 0xFFFF)
-    {
+    if (start > 0xFFFF || end > 0xFFFF) {
         QMessageBox::critical(this, "Label Error", "Address is out of bounds", QMessageBox::Ok);
         return;
     }
 
-    if (hasCollision(ref_label, start, end))
-    {
-        QMessageBox::critical(this, "Label Error", "The specified address range overlaps with an existing label.", QMessageBox::Ok);
+    if (hasCollision(ref_label, start, end)) {
+        QMessageBox::critical(this, "Label Error", "The specified address range overlaps with an existing label.",
+                              QMessageBox::Ok);
         return;
     }
 
-    if (ok1 && (!data_radio->isChecked() || (data_radio->isChecked() && ok2)))
-    {
+    if (ok1 && (!data_radio->isChecked() || (data_radio->isChecked() && ok2))) {
         accept();
     }
 }
 
-LabelInfo LabelDialog::getLabel()
-{
+LabelInfo LabelDialog::getLabel() {
     bool ok = true;
     int start = toInt(start_edit, ok);
     int end = start;
 
-    if (data_radio->isChecked())
-    {
+    if (data_radio->isChecked()) {
         end = toInt(end_edit, ok);
     }
 
     return LabelInfo{
         text_edit->text(),
         data_radio->isChecked() ? LabelType::DATA : LabelType::COMMENT,
-        (offs_t)start,
-        (offs_t)end,
+        (offs_t) start,
+        (offs_t) end,
     };
 }

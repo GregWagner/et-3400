@@ -2,15 +2,14 @@
 #include "csv.h"
 #include "log.h"
 
-bool readCSVRow(QTextStream& in, QStringList* row) {
-
+bool readCSVRow(QTextStream &in, QStringList *row) {
     static const int delta[][5] = {
         //  ,    "   \n    ?  eof
-        {   1,   2,  -1,   0,  -1  }, // 0: parsing (store char)
-        {   1,   2,  -1,   0,  -1  }, // 1: parsing (store column)
-        {   3,   4,   3,   3,  -2  }, // 2: quote entered (no-op)
-        {   3,   4,   3,   3,  -2  }, // 3: parsing inside quotes (store char)
-        {   1,   3,  -1,   0,  -1  }, // 4: quote exited (no-op)
+        {1, 2, -1, 0, -1}, // 0: parsing (store char)
+        {1, 2, -1, 0, -1}, // 1: parsing (store column)
+        {3, 4, 3, 3, -2}, // 2: quote entered (no-op)
+        {3, 4, 3, 3, -2}, // 3: parsing inside quotes (store char)
+        {1, 3, -1, 0, -1}, // 4: quote exited (no-op)
         // -1: end of row, store column, success
         // -2: eof inside quotes
     };
@@ -25,7 +24,6 @@ bool readCSVRow(QTextStream& in, QStringList* row) {
     QString cell;
 
     while (state >= 0) {
-
         if (in.atEnd())
             t = 4;
         else {
@@ -40,22 +38,20 @@ bool readCSVRow(QTextStream& in, QStringList* row) {
         state = delta[state][t];
 
         switch (state) {
-        case 0:
-        case 3:
-            cell += ch;
-            break;
-        case -1:
-        case 1:
-            row->append(cell);
-            cell = "";
-            break;
+            case 0:
+            case 3:
+                cell += ch;
+                break;
+            case -1:
+            case 1:
+                row->append(cell);
+                cell = "";
+                break;
         }
-
     }
 
     if (state == -2)
         throw "End-of-file found while inside quotes.";
 
     return true;
-
 }

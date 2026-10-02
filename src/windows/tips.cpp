@@ -2,14 +2,13 @@
 #include <QScrollArea>
 #include "tips.h"
 
-Tips::Tips(QWidget *parent) : QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint)
-{
+Tips::Tips(QWidget *parent) : QDialog(
+    parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint) {
     setupUi(this);
 }
 
-void Tips::setupUi(QDialog *Dialog)
-{
-    (void)Dialog;
+void Tips::setupUi(QDialog *Dialog) {
+    (void) Dialog;
     QVBoxLayout *mainLayout = new QVBoxLayout;
 
     QWidget *container = new QWidget;
@@ -44,27 +43,27 @@ void Tips::setupUi(QDialog *Dialog)
 
     show_tip_checkbox = new QCheckBox("Show &tips on startup");
 
-    connect(show_tip_checkbox, &QCheckBox::clicked, this, [this](bool checked)
-            {
+    connect(show_tip_checkbox, &QCheckBox::clicked, this, [this](bool checked) {
         settings->showTips = checked;
-        save_settings(settings); });
+        save_settings(settings);
+    });
 
-    connect(previous_button, &QPushButton::clicked, this, [this](bool checked)
-            {
-        (void)checked;
+    connect(previous_button, &QPushButton::clicked, this, [this](bool checked) {
+        (void) checked;
         tip--;
         if (tip < 0)
             tip = TIPCOUNT - 1;
-        label->setText(tips[tip]); });
+        label->setText(tips[tip]);
+    });
 
     connect(
-        next_button, &QPushButton::clicked, this, [this](bool checked)
-        {
-            (void)checked;
+        next_button, &QPushButton::clicked, this, [this](bool checked) {
+            (void) checked;
             tip++;
             if (tip > TIPCOUNT - 1)
                 tip = 0;
-            label->setText(tips[tip]); });
+            label->setText(tips[tip]);
+        });
 
     QWidget *buttons = new QWidget;
     QHBoxLayout *buttonLayout = new QHBoxLayout;
@@ -87,21 +86,18 @@ void Tips::setupUi(QDialog *Dialog)
     setWindowTitle("Tips");
 }
 
-void Tips::random_tip()
-{
+void Tips::random_tip() {
     tip = rand() % TIPCOUNT;
 
     label->setText(tips[tip]);
 }
 
-void Tips::set_tip(int index)
-{
+void Tips::set_tip(int index) {
     tip = index;
     label->setText(tips[tip]);
 }
 
-void Tips::set_settings(Settings *settings)
-{
+void Tips::set_settings(Settings *settings) {
     this->settings = settings;
     show_tip_checkbox->setChecked(settings->showTips);
 }

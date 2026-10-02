@@ -9,14 +9,12 @@
 #include <QCoreApplication>
 #include "../common/newline.h"
 
-QString getSettingsPath(bool &success)
-{
+QString getSettingsPath(bool &success) {
     success = true;
     return QCoreApplication::applicationDirPath() + "/settings.ini";
 }
 
-Settings load_settings()
-{
+Settings load_settings() {
     Settings settings{false, false, true, true, false, true, 471000, -1, -1, false, -1, -1, -1, -1};
 
     settings.ioLEDAddress = 0x4000;
@@ -25,8 +23,7 @@ Settings load_settings()
     bool success;
     QString settingsFile = getSettingsPath(success);
 
-    if (success)
-    {
+    if (success) {
         LOG_DEBUG << "Settings file:" << settingsFile;
 
         QFile file(settingsFile);
@@ -39,8 +36,7 @@ Settings load_settings()
         int deviceIndex = -1;
         int lastDeviceNo = -1;
 
-        while (!in.atEnd())
-        {
+        while (!in.atEnd()) {
             QString line = in.readLine();
             int sep = line.indexOf(QLatin1Char('='));
             if (sep < 0)
@@ -97,16 +93,12 @@ Settings load_settings()
                 settings.ioLEDAddress = value.toInt();
             else if (key == "IODIPAddress")
                 settings.ioDIPAddress = value.toInt();
-            else if (key == "DeviceCount")
-            {
+            else if (key == "DeviceCount") {
                 settings.devices.resize(value.toInt());
-            }
-            else if (key.startsWith("Device["))
-            {
+            } else if (key.startsWith("Device[")) {
                 int indexer = key.indexOf(QLatin1Char(']'));
                 int deviceNo = key.mid(7, indexer - 7).toInt();
-                if (deviceNo != lastDeviceNo)
-                {
+                if (deviceNo != lastDeviceNo) {
                     deviceIndex++;
                 }
                 QString subKey = key.mid(indexer + 2);
@@ -126,8 +118,7 @@ Settings load_settings()
     return settings;
 };
 
-void save_settings(Settings *settings)
-{
+void save_settings(Settings *settings) {
     bool success;
     QString settingsFile = getSettingsPath(success);
 
@@ -175,8 +166,7 @@ void save_settings(Settings *settings)
     out << "IODIPAddress=" << settings->ioDIPAddress << NEWLINE;
     out << "DeviceCount=" << settings->devices.size() << NEWLINE;
 
-    for (size_t i = 0; i < settings->devices.size(); i++)
-    {
+    for (size_t i = 0; i < settings->devices.size(); i++) {
         out << "Device[" << i << "].Name=" << settings->devices[i].name << NEWLINE;
         out << "Device[" << i << "].BitPattern=" << settings->devices[i].bit_pattern << NEWLINE;
     }
@@ -187,15 +177,13 @@ void save_settings(Settings *settings)
     LOG_DEBUG << "Saved settings";
 };
 
-void build_and_save_settings(Settings *settings, et3400emu *emu_ptr)
-{
+void build_and_save_settings(Settings *settings, et3400emu *emu_ptr) {
     auto devices = emu_ptr->memory_map->get_custom_devices();
 
     settings->devices.clear();
     settings->devices.reserve(devices.size());
 
-    for (const auto &device : devices)
-    {
+    for (const auto &device: devices) {
         DeviceSetting setting;
         setting.name = QString::fromStdString(device->name);
         setting.bit_pattern = device->get_pattern();

@@ -12,651 +12,572 @@ const int MainWindow::AUTOSTART_DELAY_MS;
 const int MainWindow::AUTOSTART_KEY_HOLD_MS;
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-{
-  settings = load_settings();
+    : QMainWindow(parent) {
+    settings = load_settings();
 
-  if (settings.mainWindowX >= 0)
-    move(settings.mainWindowX, settings.mainWindowY);
+    if (settings.mainWindowX >= 0)
+        move(settings.mainWindowX, settings.mainWindowY);
 
-  // Menu
+    // Menu
 
-  QAction *debugger_action = new QAction("&Debugger", this);
-  QAction *settings_action = new QAction("&Settings", this);
-  QAction *about_action = new QAction("&About", this);
-  QAction *tips_action = new QAction("Show &Tips", this);
+    QAction *debugger_action = new QAction("&Debugger", this);
+    QAction *settings_action = new QAction("&Settings", this);
+    QAction *about_action = new QAction("&About", this);
+    QAction *tips_action = new QAction("Show &Tips", this);
 
-  QAction *openRam_action = new QAction("&Load RAM", this);
-  openRam_action->setShortcut(Qt::CTRL | Qt::Key_O);
+    QAction *openRam_action = new QAction("&Load RAM", this);
+    openRam_action->setShortcut(Qt::CTRL | Qt::Key_O);
 
-  QAction *saveRam_action = new QAction("&Save RAM", this);
-  saveRam_action->setShortcut(Qt::CTRL | Qt::Key_S);
+    QAction *saveRam_action = new QAction("&Save RAM", this);
+    saveRam_action->setShortcut(Qt::CTRL | Qt::Key_S);
 
-  QAction *openRom_action = new QAction("Load ROM", this);
+    QAction *openRom_action = new QAction("Load ROM", this);
 
-  QAction *quit_action = new QAction("E&xit", this);
-  quit_action->setShortcut(Qt::CTRL | Qt::Key_X);
+    QAction *quit_action = new QAction("E&xit", this);
+    quit_action->setShortcut(Qt::CTRL | Qt::Key_X);
 
-  QMenu *file;
-  file = menuBar()->addMenu("&File");
-  file->addAction(openRam_action);
-  file->addAction(saveRam_action);
-  file->addSeparator();
-  file->addAction(openRom_action);
-  file->addSeparator();
-  file->addAction(quit_action);
+    QMenu *file;
+    file = menuBar()->addMenu("&File");
+    file->addAction(openRam_action);
+    file->addAction(saveRam_action);
+    file->addSeparator();
+    file->addAction(openRom_action);
+    file->addSeparator();
+    file->addAction(quit_action);
 
-  menuBar()->addAction(debugger_action);
+    menuBar()->addAction(debugger_action);
 
-  QMenu *config_menu;
-  config_menu = menuBar()->addMenu("&Config");
-  config_menu->addAction(settings_action);
+    QMenu *config_menu;
+    config_menu = menuBar()->addMenu("&Config");
+    config_menu->addAction(settings_action);
 
-  QMenu *help_menu;
-  help_menu = menuBar()->addMenu("&Help");
-  help_menu->addAction(about_action);
-  help_menu->addAction(tips_action);
+    QMenu *help_menu;
+    help_menu = menuBar()->addMenu("&Help");
+    help_menu->addAction(about_action);
+    help_menu->addAction(tips_action);
 
-  display = new DisplayWidget;
-  display->set_settings(&settings);
+    display = new DisplayWidget;
+    display->set_settings(&settings);
 
-  keypad = new Keypad;
+    keypad = new Keypad;
 
-  connect(openRom_action, &QAction::triggered, this, &MainWindow::load_rom);
+    connect(openRom_action, &QAction::triggered, this, &MainWindow::load_rom);
 
-  connect(openRam_action, &QAction::triggered, this, &MainWindow::load_ram);
-  connect(saveRam_action, &QAction::triggered, this, &MainWindow::save_ram);
-  connect(quit_action, &QAction::triggered, qApp, QApplication::quit);
+    connect(openRam_action, &QAction::triggered, this, &MainWindow::load_ram);
+    connect(saveRam_action, &QAction::triggered, this, &MainWindow::save_ram);
+    connect(quit_action, &QAction::triggered, qApp, QApplication::quit);
 
-  connect(debugger_action, &QAction::triggered, this, &MainWindow::show_debugger);
-  connect(settings_action, &QAction::triggered, this, &MainWindow::show_settings);
-  connect(about_action, &QAction::triggered, this, &MainWindow::show_about);
-  connect(tips_action, &QAction::triggered, this, &MainWindow::show_tips);
+    connect(debugger_action, &QAction::triggered, this, &MainWindow::show_debugger);
+    connect(settings_action, &QAction::triggered, this, &MainWindow::show_settings);
+    connect(about_action, &QAction::triggered, this, &MainWindow::show_about);
+    connect(tips_action, &QAction::triggered, this, &MainWindow::show_tips);
 
-  // Layout
-  QGridLayout *mainLayout = new QGridLayout;
+    // Layout
+    QGridLayout *mainLayout = new QGridLayout;
 
-  mainLayout->setColumnStretch(0, 1);
-  mainLayout->setColumnStretch(1, 1);
-  mainLayout->setRowStretch(0, 1);
-  mainLayout->setRowStretch(1, 3);
-  mainLayout->addWidget(display, 0, 0, 1, 2, Qt::AlignTop);
-  mainLayout->addWidget(keypad, 1, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
+    mainLayout->setColumnStretch(0, 1);
+    mainLayout->setColumnStretch(1, 1);
+    mainLayout->setRowStretch(0, 1);
+    mainLayout->setRowStretch(1, 3);
+    mainLayout->addWidget(display, 0, 0, 1, 2, Qt::AlignTop);
+    mainLayout->addWidget(keypad, 1, 1, 1, 1, Qt::AlignRight | Qt::AlignTop);
 
-  auto central = new QWidget;
-  central->setLayout(mainLayout);
+    auto central = new QWidget;
+    central->setLayout(mainLayout);
 
-  setCentralWidget(central);
+    setCentralWidget(central);
 
-  setWindowTitle(tr("ET-3400 Emulator"));
+    setWindowTitle(tr("ET-3400 Emulator"));
 
-  setFixedSize(QSize(350, 500));
+    setFixedSize(QSize(350, 500));
 
-  last_cycles = 0;
+    last_cycles = 0;
 
-  init_emu();
+    init_emu();
 
-  // setAttribute(Qt::WA_DeleteOnClose);
-  // connect( widget, SIGNAL(destroyed(QObject*)), this, SLOT(widgetDestroyed(QObject*)) );
-  if (settings.showTips)
-  {
-    show_tips();
-  }
-}
-
-void MainWindow::start()
-{
-  execute_emu();
-  QTimer *timer = new QTimer(this);
-  connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fps));
-  timer->start(1000);
-}
-
-void MainWindow::show_tips()
-{
-  Tips *tips = new Tips(this);
-  tips->set_settings(&settings);
-  tips->random_tip();
-  tips->show();
-}
-
-void MainWindow::fps()
-{
-  int cps = 0;
-  if (last_cycles == 0)
-  {
-    cps = emu->total_cycles;
-  }
-  else
-  {
-    cps = emu->total_cycles - last_cycles;
-  }
-
-  LOG_DEBUG << "CPS:" << cps;
-
-  last_cycles = emu->total_cycles;
-}
-
-void MainWindow::show_debugger()
-{
-  if (debugger_dialog == nullptr)
-  {
-    debugger_dialog = new DebuggerDialog;
-    debugger_dialog->set_emulator(emu);
-    debugger_dialog->set_parent_window(this);
-    debugger_dialog->setAttribute(Qt::WA_DeleteOnClose);
-    connect(debugger_dialog, &QObject::destroyed, this, [this]()
-            { debugger_dialog = nullptr; });
-    debugger_dialog->set_settings(&settings);
-    debugger_dialog->installEventFilter(this);
-    debugger_dialog->show();
-
-    if (!settings.firstDebuggerOpen)
-    {
-      debugger_dialog->show_tip();
-      settings.firstDebuggerOpen = true;
-      save_settings(&settings);
+    // setAttribute(Qt::WA_DeleteOnClose);
+    // connect( widget, SIGNAL(destroyed(QObject*)), this, SLOT(widgetDestroyed(QObject*)) );
+    if (settings.showTips) {
+        show_tips();
     }
-  }
-  else if (debugger_dialog->isVisible())
-  {
-    debugger_dialog->raise();
-    debugger_dialog->activateWindow();
-    return;
-  }
 }
 
-void MainWindow::show_io()
-{
-  if (io_dialog == nullptr)
-  {
-    io_dialog = new IODialog(this);
-    io_dialog->setEmu(emu, &settings);
-    io_dialog->setAttribute(Qt::WA_DeleteOnClose);
+void MainWindow::start() {
+    execute_emu();
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, QOverload<>::of(&MainWindow::fps));
+    timer->start(1000);
+}
 
-    connect(io_dialog, &QObject::destroyed, this, [this]()
-            {
-              io_dialog = nullptr;
-              if (debugger_dialog != nullptr)
-              {
+void MainWindow::show_tips() {
+    Tips *tips = new Tips(this);
+    tips->set_settings(&settings);
+    tips->random_tip();
+    tips->show();
+}
+
+void MainWindow::fps() {
+    int cps = 0;
+    if (last_cycles == 0) {
+        cps = emu->total_cycles;
+    } else {
+        cps = emu->total_cycles - last_cycles;
+    }
+
+    LOG_DEBUG << "CPS:" << cps;
+
+    last_cycles = emu->total_cycles;
+}
+
+void MainWindow::show_debugger() {
+    if (debugger_dialog == nullptr) {
+        debugger_dialog = new DebuggerDialog;
+        debugger_dialog->set_emulator(emu);
+        debugger_dialog->set_parent_window(this);
+        debugger_dialog->setAttribute(Qt::WA_DeleteOnClose);
+        connect(debugger_dialog, &QObject::destroyed, this, [this]() { debugger_dialog = nullptr; });
+        debugger_dialog->set_settings(&settings);
+        debugger_dialog->installEventFilter(this);
+        debugger_dialog->show();
+
+        if (!settings.firstDebuggerOpen) {
+            debugger_dialog->show_tip();
+            settings.firstDebuggerOpen = true;
+            save_settings(&settings);
+        }
+    } else if (debugger_dialog->isVisible()) {
+        debugger_dialog->raise();
+        debugger_dialog->activateWindow();
+        return;
+    }
+}
+
+void MainWindow::show_io() {
+    if (io_dialog == nullptr) {
+        io_dialog = new IODialog(this);
+        io_dialog->setEmu(emu, &settings);
+        io_dialog->setAttribute(Qt::WA_DeleteOnClose);
+
+        connect(io_dialog, &QObject::destroyed, this, [this]() {
+            io_dialog = nullptr;
+            if (debugger_dialog != nullptr) {
                 debugger_dialog->update_devices();
-              } });
+            }
+        });
 
-    connect(io_dialog, &IODialog::devices_changed, this, [this]()
-            {
-              if (debugger_dialog != nullptr)
-              {
+        connect(io_dialog, &IODialog::devices_changed, this, [this]() {
+            if (debugger_dialog != nullptr) {
                 debugger_dialog->update_devices();
                 debugger_dialog->refresh();
-              } });
+            }
+        });
 
-    io_dialog->show();
+        io_dialog->show();
 
-    if (debugger_dialog != nullptr)
-    {
-      debugger_dialog->update_devices();
+        if (debugger_dialog != nullptr) {
+            debugger_dialog->update_devices();
+        }
+    } else {
+        io_dialog->raise();
+        io_dialog->activateWindow();
     }
-  }
-  else
-  {
-    io_dialog->raise();
-    io_dialog->activateWindow();
-  }
 }
 
-void MainWindow::show_about()
-{
-  AboutDialog dialog;
-  dialog.exec();
+void MainWindow::show_about() {
+    AboutDialog dialog;
+    dialog.exec();
 }
 
-void MainWindow::show_settings()
-{
-  settings_dialog = new SettingsDialog(this);
-  settings_dialog->set_settings(&settings);
-  settings_dialog->set_emulator(emu);
-  settings_dialog->show();
-  // delete settings_dialog;
-  // settings_dialog = nullptr;
+void MainWindow::show_settings() {
+    settings_dialog = new SettingsDialog(this);
+    settings_dialog->set_settings(&settings);
+    settings_dialog->set_emulator(emu);
+    settings_dialog->show();
+    // delete settings_dialog;
+    // settings_dialog = nullptr;
 }
 
-void MainWindow::load_rom()
-{
-  File::load_rom_dialog(this, emu, load_rom_settings, settings.romDir);
-  if (debugger_dialog)
-    debugger_dialog->after_load_rom();
+void MainWindow::load_rom() {
+    File::load_rom_dialog(this, emu, load_rom_settings, settings.romDir);
+    if (debugger_dialog)
+        debugger_dialog->after_load_rom();
 }
 
-void MainWindow::load_ram()
-{
-  File::load_ram_dialog(this, emu, load_ram_settings, settings.ramDir, settings.clearRamOnLoad);
-  if (debugger_dialog)
-    debugger_dialog->after_load_ram();
+void MainWindow::load_ram() {
+    File::load_ram_dialog(this, emu, load_ram_settings, settings.ramDir, settings.clearRamOnLoad);
+    if (debugger_dialog)
+        debugger_dialog->after_load_ram();
 }
 
-void MainWindow::save_ram()
-{
-  File::save_ram_dialog(this, emu, save_ram_settings, settings.ramDir);
+void MainWindow::save_ram() {
+    File::save_ram_dialog(this, emu, save_ram_settings, settings.ramDir);
 }
 
-void MainWindow::updatecps()
-{
-  int cps = emu->get_cycles() - last_cycles;
-  last_cycles = emu->get_cycles();
-  cout << cps << endl;
+void MainWindow::updatecps() {
+    int cps = emu->get_cycles() - last_cycles;
+    last_cycles = emu->get_cycles();
+    cout << cps << endl;
 }
 
-void MainWindow::changeEvent(QEvent *event)
-{
-  if (event->type() == QEvent::WindowStateChange && debugger_dialog)
-  {
-    if (windowState() & Qt::WindowMinimized)
-      debugger_dialog->showMinimized();
-    else
-      debugger_dialog->showNormal();
-  }
-  QMainWindow::changeEvent(event);
+void MainWindow::changeEvent(QEvent *event) {
+    if (event->type() == QEvent::WindowStateChange && debugger_dialog) {
+        if (windowState() & Qt::WindowMinimized)
+            debugger_dialog->showMinimized();
+        else
+            debugger_dialog->showNormal();
+    }
+    QMainWindow::changeEvent(event);
 }
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
-{
-  if (obj == debugger_dialog && event->type() == QEvent::WindowStateChange)
-  {
-    if (!(debugger_dialog->windowState() & Qt::WindowMinimized) && (windowState() & Qt::WindowMinimized))
-      showNormal();
-  }
-  return QMainWindow::eventFilter(obj, event);
+bool MainWindow::eventFilter(QObject *obj, QEvent *event) {
+    if (obj == debugger_dialog && event->type() == QEvent::WindowStateChange) {
+        if (!(debugger_dialog->windowState() & Qt::WindowMinimized) && (windowState() & Qt::WindowMinimized))
+            showNormal();
+    }
+    return QMainWindow::eventFilter(obj, event);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event)
-{
-  (void)event;
-  settings.debuggerVisible = debugger_dialog && debugger_dialog->isVisible();
-  settings.mainWindowX = pos().x();
-  settings.mainWindowY = pos().y();
+void MainWindow::closeEvent(QCloseEvent *event) {
+    (void) event;
+    settings.debuggerVisible = debugger_dialog && debugger_dialog->isVisible();
+    settings.mainWindowX = pos().x();
+    settings.mainWindowY = pos().y();
 
-  if (debugger_dialog)
-    debugger_dialog->close(); // saves debugger geometry, resumes emu if paused
+    if (debugger_dialog)
+        debugger_dialog->close(); // saves debugger geometry, resumes emu if paused
 
-  if (io_dialog)
-    io_dialog->close(); // unmaps the LED/DIP devices while the emulator is still alive
+    if (io_dialog)
+        io_dialog->close(); // unmaps the LED/DIP devices while the emulator is still alive
 
-  if (emu)
+    if (emu)
+        emu->stop();
+
+    build_and_save_settings(&settings, emu);
+}
+
+MainWindow::~MainWindow() {
+    LOG_DEBUG << "Main destroy";
+
     emu->stop();
 
-  build_and_save_settings(&settings, emu);
+    delete emu;
+
+    if (display)
+        delete display;
+
+    if (keypad)
+        delete keypad;
+
+    if (settings_dialog)
+        delete settings_dialog;
+
+    if (debugger_dialog)
+        delete debugger_dialog;
+
+    LOG_DEBUG << "Main destroy done";
 }
 
-MainWindow::~MainWindow()
-{
-  LOG_DEBUG << "Main destroy";
-
-  emu->stop();
-
-  delete emu;
-
-  if (display)
-    delete display;
-
-  if (keypad)
-    delete keypad;
-
-  if (settings_dialog)
-    delete settings_dialog;
-
-  if (debugger_dialog)
-    delete debugger_dialog;
-
-  LOG_DEBUG << "Main destroy done";
-}
-
-void MainWindow::keyPressEvent(QKeyEvent *ev)
-{
-  switch (ev->key())
-  {
-  case Qt::Key_0:
-    keypad->press_key(keypad_io::Key0);
-    break;
-  case Qt::Key_1:
-    keypad->press_key(keypad_io::Key1);
-    break;
-  case Qt::Key_2:
-    keypad->press_key(keypad_io::Key2);
-    break;
-  case Qt::Key_3:
-    keypad->press_key(keypad_io::Key3);
-    break;
-  case Qt::Key_4:
-    keypad->press_key(keypad_io::Key4);
-    break;
-  case Qt::Key_5:
-    keypad->press_key(keypad_io::Key5);
-    break;
-  case Qt::Key_6:
-    keypad->press_key(keypad_io::Key6);
-    break;
-  case Qt::Key_7:
-    keypad->press_key(keypad_io::Key7);
-    break;
-  case Qt::Key_8:
-    keypad->press_key(keypad_io::Key8);
-    break;
-  case Qt::Key_9:
-    keypad->press_key(keypad_io::Key9);
-    break;
-  case Qt::Key_A:
-    keypad->press_key(keypad_io::KeyA);
-    break;
-  case Qt::Key_B:
-    keypad->press_key(keypad_io::KeyB);
-    break;
-  case Qt::Key_C:
-    keypad->press_key(keypad_io::KeyC);
-    break;
-  case Qt::Key_D:
-    keypad->press_key(keypad_io::KeyD);
-    break;
-  case Qt::Key_E:
-    keypad->press_key(keypad_io::KeyE);
-    break;
-  case Qt::Key_F:
-    keypad->press_key(keypad_io::KeyF);
-    break;
-  case Qt::Key_Escape:
-    keypad->press_key(keypad_io::KeyReset);
-    break;
-  }
-}
-
-void MainWindow::keyReleaseEvent(QKeyEvent *ev)
-{
-  switch (ev->key())
-  {
-  case Qt::Key_0:
-    keypad->release_key(keypad_io::Key0);
-    break;
-  case Qt::Key_1:
-    keypad->release_key(keypad_io::Key1);
-    break;
-  case Qt::Key_2:
-    keypad->release_key(keypad_io::Key2);
-    break;
-  case Qt::Key_3:
-    keypad->release_key(keypad_io::Key3);
-    break;
-  case Qt::Key_4:
-    keypad->release_key(keypad_io::Key4);
-    break;
-  case Qt::Key_5:
-    keypad->release_key(keypad_io::Key5);
-    break;
-  case Qt::Key_6:
-    keypad->release_key(keypad_io::Key6);
-    break;
-  case Qt::Key_7:
-    keypad->release_key(keypad_io::Key7);
-    break;
-  case Qt::Key_8:
-    keypad->release_key(keypad_io::Key8);
-    break;
-  case Qt::Key_9:
-    keypad->release_key(keypad_io::Key9);
-    break;
-  case Qt::Key_A:
-    keypad->release_key(keypad_io::KeyA);
-    break;
-  case Qt::Key_B:
-    keypad->release_key(keypad_io::KeyB);
-    break;
-  case Qt::Key_C:
-    keypad->release_key(keypad_io::KeyC);
-    break;
-  case Qt::Key_D:
-    keypad->release_key(keypad_io::KeyD);
-    break;
-  case Qt::Key_E:
-    keypad->release_key(keypad_io::KeyE);
-    break;
-  case Qt::Key_F:
-    keypad->release_key(keypad_io::KeyF);
-    break;
-  case Qt::Key_Escape:
-    keypad->release_key(keypad_io::KeyReset);
-    break;
-  }
-}
-
-void MainWindow::init_emu()
-{
-  LOG_DEBUG << "Creating emulator instance";
-  emu = new et3400emu(keypad->device, display->device);
-
-  keypad->set_emu(emu);
-
-  emu->set_clock_rate(settings.clockRate);
-
-  LOG_DEBUG << "Loading ROMs";
-
-  emu->memory_map->map(new memory_device("Monitor ROM", MONITOR_ADDR, MONITOR_SIZE, true));
-
-  bool success;
-  QString error;
-
-  File::load_memory(":/rom/monitor.bin", "Monitor ROM", emu, MONITOR_ADDR, success);
-  // File::load_memory(":/rom/fantomii.bin", "Fantom II", emu, FANTOMII_ADDR);
-  // File::load_memory(":/rom/tinybasic.bin", "Tiny BASIC", emu, TINYBASIC_ADDR);
-
-  File::load_labels(":/rom/monitor.map", emu, success);
-  // emu->load_labels(":/rom/monitor.map");
-  // emu->load_labels(":/rom/fantomii.map");
-
-  File::load_labels(":/ram/default.map", emu, success);
-
-  load_devices();
-}
-
-void MainWindow::load_devices()
-{
-  for (auto device : settings.devices)
-  {
-    if (is_pattern_valid(device.bit_pattern.toUtf8().constData()))
-    {
-      BitPattern bp = parse_pattern(device.bit_pattern.toUtf8().constData());
-
-      if (!emu->memory_map->has_collision(bp.start, bp.end))
-      {
-        emu->memory_map->map(new custom_device(device.name.toUtf8().constData(), bp, false));
-      }
-      else
-      {
-        QMessageBox::critical(this, "Initialization Error", "The device \"" + device.name + "\" overlaps with an existing device.", QMessageBox::StandardButton::Ok);
-      }
+void MainWindow::keyPressEvent(QKeyEvent *ev) {
+    switch (ev->key()) {
+        case Qt::Key_0:
+            keypad->press_key(keypad_io::Key0);
+            break;
+        case Qt::Key_1:
+            keypad->press_key(keypad_io::Key1);
+            break;
+        case Qt::Key_2:
+            keypad->press_key(keypad_io::Key2);
+            break;
+        case Qt::Key_3:
+            keypad->press_key(keypad_io::Key3);
+            break;
+        case Qt::Key_4:
+            keypad->press_key(keypad_io::Key4);
+            break;
+        case Qt::Key_5:
+            keypad->press_key(keypad_io::Key5);
+            break;
+        case Qt::Key_6:
+            keypad->press_key(keypad_io::Key6);
+            break;
+        case Qt::Key_7:
+            keypad->press_key(keypad_io::Key7);
+            break;
+        case Qt::Key_8:
+            keypad->press_key(keypad_io::Key8);
+            break;
+        case Qt::Key_9:
+            keypad->press_key(keypad_io::Key9);
+            break;
+        case Qt::Key_A:
+            keypad->press_key(keypad_io::KeyA);
+            break;
+        case Qt::Key_B:
+            keypad->press_key(keypad_io::KeyB);
+            break;
+        case Qt::Key_C:
+            keypad->press_key(keypad_io::KeyC);
+            break;
+        case Qt::Key_D:
+            keypad->press_key(keypad_io::KeyD);
+            break;
+        case Qt::Key_E:
+            keypad->press_key(keypad_io::KeyE);
+            break;
+        case Qt::Key_F:
+            keypad->press_key(keypad_io::KeyF);
+            break;
+        case Qt::Key_Escape:
+            keypad->press_key(keypad_io::KeyReset);
+            break;
     }
-    else
-    {
-      QMessageBox::critical(this, "Initialization Error", "The address pattern for device \"" + device.name + "\" is invalid.", QMessageBox::StandardButton::Ok);
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent *ev) {
+    switch (ev->key()) {
+        case Qt::Key_0:
+            keypad->release_key(keypad_io::Key0);
+            break;
+        case Qt::Key_1:
+            keypad->release_key(keypad_io::Key1);
+            break;
+        case Qt::Key_2:
+            keypad->release_key(keypad_io::Key2);
+            break;
+        case Qt::Key_3:
+            keypad->release_key(keypad_io::Key3);
+            break;
+        case Qt::Key_4:
+            keypad->release_key(keypad_io::Key4);
+            break;
+        case Qt::Key_5:
+            keypad->release_key(keypad_io::Key5);
+            break;
+        case Qt::Key_6:
+            keypad->release_key(keypad_io::Key6);
+            break;
+        case Qt::Key_7:
+            keypad->release_key(keypad_io::Key7);
+            break;
+        case Qt::Key_8:
+            keypad->release_key(keypad_io::Key8);
+            break;
+        case Qt::Key_9:
+            keypad->release_key(keypad_io::Key9);
+            break;
+        case Qt::Key_A:
+            keypad->release_key(keypad_io::KeyA);
+            break;
+        case Qt::Key_B:
+            keypad->release_key(keypad_io::KeyB);
+            break;
+        case Qt::Key_C:
+            keypad->release_key(keypad_io::KeyC);
+            break;
+        case Qt::Key_D:
+            keypad->release_key(keypad_io::KeyD);
+            break;
+        case Qt::Key_E:
+            keypad->release_key(keypad_io::KeyE);
+            break;
+        case Qt::Key_F:
+            keypad->release_key(keypad_io::KeyF);
+            break;
+        case Qt::Key_Escape:
+            keypad->release_key(keypad_io::KeyReset);
+            break;
     }
-  }
 }
 
-void MainWindow::execute_emu()
-{
-  LOG_DEBUG << "Setting up event handlers";
-  keypad->device->on_reset_press = [this]
-  { emu->reset(); };
+void MainWindow::init_emu() {
+    LOG_DEBUG << "Creating emulator instance";
+    emu = new et3400emu(keypad->device, display->device);
 
-  emu->on_render_frame = [this]
-  {
-    display->update_display();
-    if (debugger_dialog != nullptr)
-    {
-      debugger_dialog->io_refresh();
+    keypad->set_emu(emu);
+
+    emu->set_clock_rate(settings.clockRate);
+
+    LOG_DEBUG << "Loading ROMs";
+
+    emu->memory_map->map(new memory_device("Monitor ROM", MONITOR_ADDR, MONITOR_SIZE, true));
+
+    bool success;
+    QString error;
+
+    File::load_memory(":/rom/monitor.bin", "Monitor ROM", emu, MONITOR_ADDR, success);
+    // File::load_memory(":/rom/fantomii.bin", "Fantom II", emu, FANTOMII_ADDR);
+    // File::load_memory(":/rom/tinybasic.bin", "Tiny BASIC", emu, TINYBASIC_ADDR);
+
+    File::load_labels(":/rom/monitor.map", emu, success);
+    // emu->load_labels(":/rom/monitor.map");
+    // emu->load_labels(":/rom/fantomii.map");
+
+    File::load_labels(":/ram/default.map", emu, success);
+
+    load_devices();
+}
+
+void MainWindow::load_devices() {
+    for (auto device: settings.devices) {
+        if (is_pattern_valid(device.bit_pattern.toUtf8().constData())) {
+            BitPattern bp = parse_pattern(device.bit_pattern.toUtf8().constData());
+
+            if (!emu->memory_map->has_collision(bp.start, bp.end)) {
+                emu->memory_map->map(new custom_device(device.name.toUtf8().constData(), bp, false));
+            } else {
+                QMessageBox::critical(this, "Initialization Error",
+                                      "The device \"" + device.name + "\" overlaps with an existing device.",
+                                      QMessageBox::StandardButton::Ok);
+            }
+        } else {
+            QMessageBox::critical(this, "Initialization Error",
+                                  "The address pattern for device \"" + device.name + "\" is invalid.",
+                                  QMessageBox::StandardButton::Ok);
+        }
     }
-    if (io_dialog != nullptr)
-    {
-      io_dialog->refresh();
-    }
-  };
-
-  LOG_DEBUG << "Initializing and starting emulator";
-  emu->init();
-
-  if (has_start_address)
-  {
-    int delay_time_ms = (int)((float)DEFAULT_CLOCK_RATE / (float)emu->get_clock_rate() * AUTOSTART_DELAY_MS);
-
-    delay_time_ms = std::max(delay_time_ms, AUTOSTART_DELAY_MS);
-
-    QTimer::singleShot(delay_time_ms, this, &MainWindow::autostart_sequence);
-  }
-
-  emu->start();
-
-  if (showDebugger || settings.debuggerVisible)
-  {
-    show_debugger();
-  }
 }
 
-void MainWindow::autostart_sequence()
-{
-  int hold_time_ms = (int)((float)DEFAULT_CLOCK_RATE / (float)emu->get_clock_rate() * AUTOSTART_KEY_HOLD_MS);
-  hold_time_ms = std::max(hold_time_ms, AUTOSTART_KEY_HOLD_MS);
+void MainWindow::execute_emu() {
+    LOG_DEBUG << "Setting up event handlers";
+    keypad->device->on_reset_press = [this] { emu->reset(); };
 
-  LOG_DEBUG << "Hold time: " << hold_time_ms << "ms";
-
-  LOG_DEBUG << "Start Address: " << toHex(start_address);
-
-  uint16_t addr = static_cast<uint16_t>(start_address);
-
-  const keypad_io::Keys seq[] = {
-      keypad_io::Keys::KeyD,
-      static_cast<keypad_io::Keys>((addr >> 12) & 0xF),
-      static_cast<keypad_io::Keys>((addr >> 8) & 0xF),
-      static_cast<keypad_io::Keys>((addr >> 4) & 0xF),
-      static_cast<keypad_io::Keys>(addr & 0xF),
-  };
-
-  int t = 0;
-
-  for (auto key : seq)
-  {
-    LOG_DEBUG << "PRESS " << key;
-    QTimer::singleShot(t, this, [this, key]()
-                       { keypad->press_key(key); });
-    t += hold_time_ms;
-    LOG_DEBUG << "Release " << key;
-    QTimer::singleShot(t, this, [this, key]()
-                       { keypad->release_key(key); });
-    t += hold_time_ms;
-  }
-}
-
-void MainWindow::setAddress(std::string address)
-{
-  try
-  {
-    start_address = (uint16_t)std::stoul(address, nullptr, 16);
-    has_start_address = true;
-  }
-  catch (const std::exception &)
-  {
-  }
-}
-
-void MainWindow::setSpeed(std::string speed)
-{
-  // allow parsing speed with % or with suffixes (Hz, kHz, MHz)
-  try
-  {
-
-    auto tolower_str = [](std::string s)
-    {
-      std::transform(s.begin(), s.end(), s.begin(), ::tolower);
-      return s;
+    emu->on_render_frame = [this] {
+        display->update_display();
+        if (debugger_dialog != nullptr) {
+            debugger_dialog->io_refresh();
+        }
+        if (io_dialog != nullptr) {
+            io_dialog->refresh();
+        }
     };
 
-    if (speed.size() > 3 && tolower_str(speed.substr(speed.size() - 3)) == "khz")
-    {
-      speed = speed.substr(0, speed.size() - 3);
-      emu->set_clock_rate(std::stoi(speed, nullptr, 10) * 1000);
-      return;
+    LOG_DEBUG << "Initializing and starting emulator";
+    emu->init();
+
+    if (has_start_address) {
+        int delay_time_ms = (int) ((float) DEFAULT_CLOCK_RATE / (float) emu->get_clock_rate() * AUTOSTART_DELAY_MS);
+
+        delay_time_ms = std::max(delay_time_ms, AUTOSTART_DELAY_MS);
+
+        QTimer::singleShot(delay_time_ms, this, &MainWindow::autostart_sequence);
     }
-    else if (speed.size() > 3 && tolower_str(speed.substr(speed.size() - 3)) == "mhz")
-    {
-      speed = speed.substr(0, speed.size() - 3);
-      emu->set_clock_rate(std::stoi(speed, nullptr, 10) * 1000000);
-      return;
+
+    emu->start();
+
+    if (showDebugger || settings.debuggerVisible) {
+        show_debugger();
     }
-    else if (speed.size() > 2 && tolower_str(speed.substr(speed.size() - 2)) == "hz")
-    {
-      speed = speed.substr(0, speed.size() - 2);
-    }
-    else
-    {
-      int pct = std::stoi(speed, nullptr, 10);
-      emu->set_clock_rate(DEFAULT_CLOCK_RATE * pct / 100);
-      return;
-    }
-  }
-  catch (const std::exception &)
-  {
-  }
 }
 
-void MainWindow::setShowDebugger(bool show)
-{
-  showDebugger = show;
+void MainWindow::autostart_sequence() {
+    int hold_time_ms = (int) ((float) DEFAULT_CLOCK_RATE / (float) emu->get_clock_rate() * AUTOSTART_KEY_HOLD_MS);
+    hold_time_ms = std::max(hold_time_ms, AUTOSTART_KEY_HOLD_MS);
+
+    LOG_DEBUG << "Hold time: " << hold_time_ms << "ms";
+
+    LOG_DEBUG << "Start Address: " << toHex(start_address);
+
+    uint16_t addr = static_cast<uint16_t>(start_address);
+
+    const keypad_io::Keys seq[] = {
+        keypad_io::Keys::KeyD,
+        static_cast<keypad_io::Keys>((addr >> 12) & 0xF),
+        static_cast<keypad_io::Keys>((addr >> 8) & 0xF),
+        static_cast<keypad_io::Keys>((addr >> 4) & 0xF),
+        static_cast<keypad_io::Keys>(addr & 0xF),
+    };
+
+    int t = 0;
+
+    for (auto key: seq) {
+        LOG_DEBUG << "PRESS " << key;
+        QTimer::singleShot(t, this, [this, key]() { keypad->press_key(key); });
+        t += hold_time_ms;
+        LOG_DEBUG << "Release " << key;
+        QTimer::singleShot(t, this, [this, key]() { keypad->release_key(key); });
+        t += hold_time_ms;
+    }
 }
 
-void MainWindow::setLabel(std::string labelFile)
-{
-  // check if file exists
-  if (!std::filesystem::exists(labelFile))
-  {
-    LOG_ERROR << "Label file does not exist:" << labelFile.c_str();
-    return;
-  }
-
-  bool success;
-
-  File::load_labels(QString::fromStdString(labelFile), emu, success);
+void MainWindow::setAddress(std::string address) {
+    try {
+        start_address = (uint16_t) std::stoul(address, nullptr, 16);
+        has_start_address = true;
+    } catch (const std::exception &) {
+    }
 }
 
-void MainWindow::setRAM(std::string file)
-{
-  LOG_DEBUG << "Loading RAM from file:" << QString::fromStdString(file);
-  if (!std::filesystem::exists(file))
-  {
-    QMessageBox::critical(this, "Error loading RAM", "File not found");
-    return;
-  }
+void MainWindow::setSpeed(std::string speed) {
+    // allow parsing speed with % or with suffixes (Hz, kHz, MHz)
+    try {
+        auto tolower_str = [](std::string s) {
+            std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+            return s;
+        };
 
-  bool success;
-
-  File::load_memory(QString::fromStdString(file), "RAM", emu, 0x0000, success);
-
-  if (!success)
-  {
-    QMessageBox::critical(this, "Error loading RAM", File::error);
-  }
+        if (speed.size() > 3 && tolower_str(speed.substr(speed.size() - 3)) == "khz") {
+            speed = speed.substr(0, speed.size() - 3);
+            emu->set_clock_rate(std::stoi(speed, nullptr, 10) * 1000);
+            return;
+        } else if (speed.size() > 3 && tolower_str(speed.substr(speed.size() - 3)) == "mhz") {
+            speed = speed.substr(0, speed.size() - 3);
+            emu->set_clock_rate(std::stoi(speed, nullptr, 10) * 1000000);
+            return;
+        } else if (speed.size() > 2 && tolower_str(speed.substr(speed.size() - 2)) == "hz") {
+            speed = speed.substr(0, speed.size() - 2);
+        } else {
+            int pct = std::stoi(speed, nullptr, 10);
+            emu->set_clock_rate(DEFAULT_CLOCK_RATE * pct / 100);
+            return;
+        }
+    } catch (const std::exception &) {
+    }
 }
 
-void MainWindow::setROM(std::string file)
-{
-  LOG_DEBUG << "Loading ROM from file:" << QString::fromStdString(file);
-  if (!std::filesystem::exists(file))
-  {
-    QMessageBox::critical(this, "Error loading ROM", "File not found");
-    return;
-  }
+void MainWindow::setShowDebugger(bool show) {
+    showDebugger = show;
+}
 
-  bool success;
+void MainWindow::setLabel(std::string labelFile) {
+    // check if file exists
+    if (!std::filesystem::exists(labelFile)) {
+        LOG_ERROR << "Label file does not exist:" << labelFile.c_str();
+        return;
+    }
 
-  File::load_memory(QString::fromStdString(file), "Monitor ROM", emu, 0xFC00, success);
+    bool success;
 
-  if (!success)
-  {
-    QMessageBox::critical(this, "Error loading ROM", File::error);
-  }
+    File::load_labels(QString::fromStdString(labelFile), emu, success);
+}
+
+void MainWindow::setRAM(std::string file) {
+    LOG_DEBUG << "Loading RAM from file:" << QString::fromStdString(file);
+    if (!std::filesystem::exists(file)) {
+        QMessageBox::critical(this, "Error loading RAM", "File not found");
+        return;
+    }
+
+    bool success;
+
+    File::load_memory(QString::fromStdString(file), "RAM", emu, 0x0000, success);
+
+    if (!success) {
+        QMessageBox::critical(this, "Error loading RAM", File::error);
+    }
+}
+
+void MainWindow::setROM(std::string file) {
+    LOG_DEBUG << "Loading ROM from file:" << QString::fromStdString(file);
+    if (!std::filesystem::exists(file)) {
+        QMessageBox::critical(this, "Error loading ROM", "File not found");
+        return;
+    }
+
+    bool success;
+
+    File::load_memory(QString::fromStdString(file), "Monitor ROM", emu, 0xFC00, success);
+
+    if (!success) {
+        QMessageBox::critical(this, "Error loading ROM", File::error);
+    }
 }

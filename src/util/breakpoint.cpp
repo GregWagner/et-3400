@@ -2,25 +2,22 @@
 #include "csv.h"
 #include "../common/newline.h"
 
-void BreakpointReader::Write(QString path, std::vector<Breakpoint> *breakpoints, bool &success)
-{
+void BreakpointReader::Write(QString path, std::vector<Breakpoint> *breakpoints, bool &success) {
     std::vector<Breakpoint>::iterator current = breakpoints->begin();
 
     QFile file(path);
 
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-    {
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         success = false;
         return;
     }
 
     QTextStream out(&file);
 
-    while (current != breakpoints->end())
-    {
+    while (current != breakpoints->end()) {
         out << QString("%1").arg((*current).address, 4, 16, QChar('0')).toUpper() << ","
-            << ((*current).is_enabled ? QString("Yes") : QString("No"))
-            << NEWLINE;
+                << ((*current).is_enabled ? QString("Yes") : QString("No"))
+                << NEWLINE;
 
         current++;
     }
@@ -30,13 +27,11 @@ void BreakpointReader::Write(QString path, std::vector<Breakpoint> *breakpoints,
     success = true;
 }
 
-std::vector<Breakpoint> *BreakpointReader::Read(QString path, bool &success)
-{
+std::vector<Breakpoint> *BreakpointReader::Read(QString path, bool &success) {
     std::vector<Breakpoint> *breakpoints = new std::vector<Breakpoint>;
     QFile file(path);
 
-    if (!file.open(QIODevice::ReadOnly))
-    {
+    if (!file.open(QIODevice::ReadOnly)) {
         success = false;
         return breakpoints;
     }
@@ -44,10 +39,8 @@ std::vector<Breakpoint> *BreakpointReader::Read(QString path, bool &success)
     QTextStream in(&file);
     QStringList parts;
 
-    while (readCSVRow(in, &parts))
-    {
-        if (parts.length() != 2)
-        {
+    while (readCSVRow(in, &parts)) {
+        if (parts.length() != 2) {
             success = false;
             return nullptr;
         }
@@ -55,8 +48,7 @@ std::vector<Breakpoint> *BreakpointReader::Read(QString path, bool &success)
         bool bStatus = false;
         uint32_t start = parts.at(0).toUInt(&bStatus, 16);
 
-        if (!bStatus)
-        {
+        if (!bStatus) {
             success = false;
             return nullptr;
         }

@@ -21,17 +21,20 @@
 #include "../util/settings.h"
 #include "io_settings.h"
 
-class IODialog : public QDialog
-{
+class IODialog : public QDialog {
     Q_OBJECT
 
 public:
     IODialog(QWidget *parent = nullptr);
+
     void setEmu(et3400emu *emu, Settings *settings);
+
     void refresh();
 
-signals:
+    signals:
     // emitted after the LED/DIP devices have been re-registered at new addresses
+
+
     void devices_changed();
 
 protected:
@@ -54,11 +57,17 @@ private:
     io_device *dip_device = nullptr;
 
     void create_devices();
+
     void update_status_bar();
+
     void destroy_devices();
+
     bool address_in_use(offs_t address);
+
     void setupUi(QDialog *Dialog);
+
     void retranslateUi(QDialog *Dialog);
+
     void show_io_settings();
 };
 

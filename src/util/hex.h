@@ -9,15 +9,17 @@
 
 bool is_hex(QString filename);
 
-class HexFile
-{
+class HexFile {
 public:
     static bool Read(QString file, std::vector<data_block> *blocks);
+
     static bool Write(QString file, std::vector<data_block> *blocks);
+
     static QString error;
 
 private:
     static uint16_t WriteRecords(QTextStream &out, std::vector<data_block> *blocks);
+
     static void WriteTerminator(QTextStream &out);
 };
 

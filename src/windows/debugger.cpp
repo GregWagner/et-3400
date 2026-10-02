@@ -8,747 +8,647 @@
 #include "clear_ram.h"
 #include "../common/util.h"
 
-DebuggerDialog::DebuggerDialog() : DebuggerDialog(nullptr)
-{
-	setupUI();
-	emu_set = false;
+DebuggerDialog::DebuggerDialog() : DebuggerDialog(nullptr) {
+    setupUI();
+    emu_set = false;
 }
 
-DebuggerDialog::DebuggerDialog(QWidget *parent) : QDialog(parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint)
-{
+DebuggerDialog::DebuggerDialog(QWidget *parent) : QDialog(
+    parent, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint) {
 }
 
-void DebuggerDialog::show_tip()
-{
-	Tips *tips = new Tips(this);
-	tips->set_settings(settings);
-	tips->set_tip(DEBUGGER_BREAKPOINT_TIP);
-	tips->show();
+void DebuggerDialog::show_tip() {
+    Tips *tips = new Tips(this);
+    tips->set_settings(settings);
+    tips->set_tip(DEBUGGER_BREAKPOINT_TIP);
+    tips->show();
 }
 
-void DebuggerDialog::start(bool checked)
-{
-	(void)checked;
-	if (!emu_ptr->get_running())
-	{
-		emu_ptr->resume();
-		disassembly_view->clearCurrent();
-		update_button_state();
-	}
+void DebuggerDialog::start(bool checked) {
+    (void) checked;
+    if (!emu_ptr->get_running()) {
+        emu_ptr->resume();
+        disassembly_view->clearCurrent();
+        update_button_state();
+    }
 }
 
-void DebuggerDialog::stop(bool checked)
-{
-	(void)checked;
-	if (emu_ptr->get_running())
-	{
-		pauseAndUpdateDisassembler();
-		update_button_state();
-		disassembly_view->redraw();
-	}
+void DebuggerDialog::stop(bool checked) {
+    (void) checked;
+    if (emu_ptr->get_running()) {
+        pauseAndUpdateDisassembler();
+        update_button_state();
+        disassembly_view->redraw();
+    }
 }
 
-void DebuggerDialog::step_into(bool checked)
-{
-	(void)checked;
-	if (!emu_ptr->get_running())
-	{
-		stepAndUpdateDisassembler();
-		disassembly_view->redraw();
-	}
+void DebuggerDialog::step_into(bool checked) {
+    (void) checked;
+    if (!emu_ptr->get_running()) {
+        stepAndUpdateDisassembler();
+        disassembly_view->redraw();
+    }
 }
 
-void DebuggerDialog::step_over(bool checked)
-{
-	(void)checked;
-	if (!emu_ptr->get_running())
-	{
-		offs_t pc = emu_ptr->get_status().pc;
-		uint8_t opcode = emu_ptr->read_byte(pc);
+void DebuggerDialog::step_over(bool checked) {
+    (void) checked;
+    if (!emu_ptr->get_running()) {
+        offs_t pc = emu_ptr->get_status().pc;
+        uint8_t opcode = emu_ptr->read_byte(pc);
 
-		int *table_entry = Disassembler::GetTableEntry(opcode);
+        int *table_entry = Disassembler::GetTableEntry(opcode);
 
-		int instruction_length = Disassembler::get_instruction_length(table_entry[1]);
-		offs_t next_instruction = pc + instruction_length;
+        int instruction_length = Disassembler::get_instruction_length(table_entry[1]);
+        offs_t next_instruction = pc + instruction_length;
 
-		if (Disassembler::IsSubroutine(table_entry[0]))
-		{
-			// Hack? Step into next instruction so that we move past the breakpoint,
-			// otherwise we end up on the same instruction for one pass
-			emu_ptr->step();
-			emu_ptr->breakpoints->addBreakpoint(next_instruction, true);
-			emu_ptr->start();
-			disassembly_view->clearCurrent();
-			disassembly_view->clearSelected();
-			update_button_state();
-			disassembly_view->redraw();
-		}
-		else
-		{
-			stepAndUpdateDisassembler();
-			disassembly_view->redraw();
-		}
-	}
+        if (Disassembler::IsSubroutine(table_entry[0])) {
+            // Hack? Step into next instruction so that we move past the breakpoint,
+            // otherwise we end up on the same instruction for one pass
+            emu_ptr->step();
+            emu_ptr->breakpoints->addBreakpoint(next_instruction, true);
+            emu_ptr->start();
+            disassembly_view->clearCurrent();
+            disassembly_view->clearSelected();
+            update_button_state();
+            disassembly_view->redraw();
+        } else {
+            stepAndUpdateDisassembler();
+            disassembly_view->redraw();
+        }
+    }
 }
 
-void DebuggerDialog::step_out(bool checked)
-{
-	(void)checked;
-	if (!emu_ptr->get_running())
-	{
-		emu_ptr->set_step_out();
+void DebuggerDialog::step_out(bool checked) {
+    (void) checked;
+    if (!emu_ptr->get_running()) {
+        emu_ptr->set_step_out();
 
-		emu_ptr->start();
-		disassembly_view->clearCurrent();
-		disassembly_view->clearSelected();
-		update_button_state();
-		disassembly_view->redraw();
-	}
+        emu_ptr->start();
+        disassembly_view->clearCurrent();
+        disassembly_view->clearSelected();
+        update_button_state();
+        disassembly_view->redraw();
+    }
 }
 
-void DebuggerDialog::refresh()
-{
-	if (settings->showDasmView)
-	{
-		disassembly_view->rebuild();
-	}
-	if (settings->showMemoryView)
-	{
-		memory_view->redraw();
-	}
+void DebuggerDialog::refresh() {
+    if (settings->showDasmView) {
+        disassembly_view->rebuild();
+    }
+    if (settings->showMemoryView) {
+        memory_view->redraw();
+    }
 }
 
-void DebuggerDialog::io_refresh()
-{
+void DebuggerDialog::io_refresh() {
     led_array->update_display();
 }
 
-void DebuggerDialog::reset(bool checked)
-{
-	(void)checked;
-	emu_ptr->reset();
+void DebuggerDialog::reset(bool checked) {
+    (void) checked;
+    emu_ptr->reset();
 }
 
-void DebuggerDialog::toggle_memory_panel(bool checked)
-{
-	memory_groupBox->setVisible(checked);
-	settings->showMemoryView = checked;
-	resize(sizeHint().width(), height());
-	save_settings();
+void DebuggerDialog::toggle_memory_panel(bool checked) {
+    memory_groupBox->setVisible(checked);
+    settings->showMemoryView = checked;
+    resize(sizeHint().width(), height());
+    save_settings();
 }
 
-void DebuggerDialog::set_heat_map_off()
-{
-	memory_view->setHeatMapEnabled(false);
-	settings->showHeatMap = false;
+void DebuggerDialog::set_heat_map_off() {
+    memory_view->setHeatMapEnabled(false);
+    settings->showHeatMap = false;
 
-	save_settings();
+    save_settings();
 }
 
-void DebuggerDialog::set_heat_map_fade()
-{
-	memory_view->setHeatMapEnabled(true);
-	memory_view->setHeatMapDecay(FADE_SPEED);
-	settings->showHeatMap = true;
-	settings->heatMapDecay = FADE_SPEED;
+void DebuggerDialog::set_heat_map_fade() {
+    memory_view->setHeatMapEnabled(true);
+    memory_view->setHeatMapDecay(FADE_SPEED);
+    settings->showHeatMap = true;
+    settings->heatMapDecay = FADE_SPEED;
 
-	save_settings();
+    save_settings();
 }
 
-void DebuggerDialog::set_heat_map_fade_slow()
-{
-	memory_view->setHeatMapEnabled(true);
-	memory_view->setHeatMapDecay(FADE_SLOW_SPEED);
-	settings->showHeatMap = true;
-	settings->heatMapDecay = FADE_SLOW_SPEED;
+void DebuggerDialog::set_heat_map_fade_slow() {
+    memory_view->setHeatMapEnabled(true);
+    memory_view->setHeatMapDecay(FADE_SLOW_SPEED);
+    settings->showHeatMap = true;
+    settings->heatMapDecay = FADE_SLOW_SPEED;
 
-	save_settings();
+    save_settings();
 }
 
-void DebuggerDialog::set_heat_map_persist()
-{
-	memory_view->setHeatMapEnabled(true);
-	memory_view->setHeatMapDecay(PERSIST_SPEED);
-	settings->showHeatMap = true;
-	settings->heatMapDecay = PERSIST_SPEED;
+void DebuggerDialog::set_heat_map_persist() {
+    memory_view->setHeatMapEnabled(true);
+    memory_view->setHeatMapDecay(PERSIST_SPEED);
+    settings->showHeatMap = true;
+    settings->heatMapDecay = PERSIST_SPEED;
 
-	save_settings();
+    save_settings();
 }
 
-void DebuggerDialog::toggle_heat_map()
-{
-	if (settings->showHeatMap)
-	{
-		switch (settings->heatMapDecay)
-		{
-		case FADE_SPEED:
-			set_heat_map_persist_action->setChecked(true);
-			break;
-		case PERSIST_SPEED:
-			set_heat_map_off_action->setChecked(true);
-			break;
-		}
-	}
-	else
-	{
-		set_heat_map_fade_action->setChecked(true);
-	}
+void DebuggerDialog::toggle_heat_map() {
+    if (settings->showHeatMap) {
+        switch (settings->heatMapDecay) {
+            case FADE_SPEED:
+                set_heat_map_persist_action->setChecked(true);
+                break;
+            case PERSIST_SPEED:
+                set_heat_map_off_action->setChecked(true);
+                break;
+        }
+    } else {
+        set_heat_map_fade_action->setChecked(true);
+    }
 }
 
-void DebuggerDialog::clear_heat_map()
-{
-	memory_view->clearHeatMap();
+void DebuggerDialog::clear_heat_map() {
+    memory_view->clearHeatMap();
 }
 
-void DebuggerDialog::toggle_disassembly_panel(bool checked)
-{
-	disassembly_groupBox->setVisible(checked);
-	settings->showDasmView = checked;
-	resize(sizeHint().width(), height());
+void DebuggerDialog::toggle_disassembly_panel(bool checked) {
+    disassembly_groupBox->setVisible(checked);
+    settings->showDasmView = checked;
+    resize(sizeHint().width(), height());
 
-	LOG_DEBUG << "toggle dasm";
-	save_settings();
+    LOG_DEBUG << "toggle dasm";
+    save_settings();
 }
 
-void DebuggerDialog::toggle_auto_refresh_disassembly_panel(bool checked)
-{
-	disassembly_view->setAutoRefresh(checked);
-	settings->autoRefreshDasm = checked;
-	save_settings();
+void DebuggerDialog::toggle_auto_refresh_disassembly_panel(bool checked) {
+    disassembly_view->setAutoRefresh(checked);
+    settings->autoRefreshDasm = checked;
+    save_settings();
 }
 
-void DebuggerDialog::toggle_status_panel(bool checked)
-{
-	status_groupBox->setVisible(checked);
+void DebuggerDialog::toggle_status_panel(bool checked) {
+    status_groupBox->setVisible(checked);
 }
 
-DebuggerDialog::~DebuggerDialog()
-{
-	LOG_DEBUG << "DebuggerDialog destroy";
-	delete memory_view;
-	delete memory_selector;
-	delete disassembly_view;
-	delete disassembly_selector;
-	LOG_DEBUG << "DebuggerDialog destroy done";
+DebuggerDialog::~DebuggerDialog() {
+    LOG_DEBUG << "DebuggerDialog destroy";
+    delete memory_view;
+    delete memory_selector;
+    delete disassembly_view;
+    delete disassembly_selector;
+    LOG_DEBUG << "DebuggerDialog destroy done";
 }
 
-void DebuggerDialog::select_memory_location(int index)
-{
-	QVariant v = memory_selector->itemData(index);
-	memory_mapped_device *device = (memory_mapped_device *)v.value<quintptr>();
+void DebuggerDialog::select_memory_location(int index) {
+    QVariant v = memory_selector->itemData(index);
+    memory_mapped_device *device = (memory_mapped_device *) v.value<quintptr>();
 
-	if (device == nullptr)
-		return;
+    if (device == nullptr)
+        return;
 
-	memory_view->set_device(device);
+    memory_view->set_device(device);
 }
 
-void DebuggerDialog::select_disassembly_location(int index)
-{
-	QVariant v = disassembly_selector->itemData(index);
-	memory_mapped_device *device = (memory_mapped_device *)v.value<quintptr>();
+void DebuggerDialog::select_disassembly_location(int index) {
+    QVariant v = disassembly_selector->itemData(index);
+    memory_mapped_device *device = (memory_mapped_device *) v.value<quintptr>();
 
-	if (device == nullptr)
-		return;
+    if (device == nullptr)
+        return;
 
-	disassembly_view->set_range(device->get_start(), device->get_end(), device->get_mapped_memory());
-	labels_dialog->populate_labels_table();
-	update_clear_ram_labels_state();
+    disassembly_view->set_range(device->get_start(), device->get_end(), device->get_mapped_memory());
+    labels_dialog->populate_labels_table();
+    update_clear_ram_labels_state();
 }
 
-void DebuggerDialog::update_devices()
-{
-	disassembly_selector->clear();
-	memory_selector->clear();
-	auto devices = emu_ptr->memory_map->get_block_devices();
-	for (auto *device : devices)
-	{
-		if (device->can_disassemble)
-		{
-			disassembly_selector->addItem(QString::fromStdString(device->name), QVariant::fromValue((quintptr)device));
-		}
-		memory_selector->addItem(QString::fromStdString(device->name), QVariant::fromValue((quintptr)device));
-	}
+void DebuggerDialog::update_devices() {
+    disassembly_selector->clear();
+    memory_selector->clear();
+    auto devices = emu_ptr->memory_map->get_block_devices();
+    for (auto *device: devices) {
+        if (device->can_disassemble) {
+            disassembly_selector->addItem(QString::fromStdString(device->name), QVariant::fromValue((quintptr) device));
+        }
+        memory_selector->addItem(QString::fromStdString(device->name), QVariant::fromValue((quintptr) device));
+    }
 }
 
-void DebuggerDialog::set_emulator(et3400emu *emu)
-{
-	if (!emu_set)
-	{
-		emu_ptr = emu;
-		emu_ptr->on_breakpoint = [this]
-		{
-			QMetaObject::invokeMethod(this, [this]()
-									  { breakpoint_handler(false); }, Qt::QueuedConnection);
-		};
-		emu_set = true;
-		memory_view->set_emulator(emu);
-		disassembly_view->setEmulator(emu);
-		status_view->set_emulator(emu);
+void DebuggerDialog::set_emulator(et3400emu *emu) {
+    if (!emu_set) {
+        emu_ptr = emu;
+        emu_ptr->on_breakpoint = [this] {
+            QMetaObject::invokeMethod(this, [this]() { breakpoint_handler(false); }, Qt::QueuedConnection);
+        };
+        emu_set = true;
+        memory_view->set_emulator(emu);
+        disassembly_view->setEmulator(emu);
+        status_view->set_emulator(emu);
 
-		update_devices();
+        update_devices();
 
-		memory_selector->setCurrentIndex(0);
-		disassembly_selector->setCurrentIndex(0);
+        memory_selector->setCurrentIndex(0);
+        disassembly_selector->setCurrentIndex(0);
 
-		select_memory_location(0);
+        select_memory_location(0);
 
-		devices_dialog->populate_devices_table();
-	}
-	update_button_state();
+        devices_dialog->populate_devices_table();
+    }
+    update_button_state();
 }
 
-void DebuggerDialog::set_settings(Settings *settings)
-{
-	this->settings = settings;
+void DebuggerDialog::set_settings(Settings *settings) {
+    this->settings = settings;
 
-	disassembly_groupBox->setVisible(settings->showDasmView);
-	memory_groupBox->setVisible(settings->showMemoryView);
+    disassembly_groupBox->setVisible(settings->showDasmView);
+    memory_groupBox->setVisible(settings->showMemoryView);
 
-	toggle_disassembly_action->setChecked(settings->showDasmView);
-	toggle_autorefresh_disassembly_action->setChecked(settings->autoRefreshDasm);
-	toggle_memory_action->setChecked(settings->showMemoryView);
+    toggle_disassembly_action->setChecked(settings->showDasmView);
+    toggle_autorefresh_disassembly_action->setChecked(settings->autoRefreshDasm);
+    toggle_memory_action->setChecked(settings->showMemoryView);
 
-	if (settings->showHeatMap)
-	{
-		switch (settings->heatMapDecay)
-		{
-		case FADE_SPEED:
-			set_heat_map_fade_action->setChecked(true);
-			break;
-		case PERSIST_SPEED:
-			set_heat_map_persist_action->setChecked(true);
-			break;
-		default:
-			settings->heatMapDecay = FADE_SPEED;
-			break;
-		}
+    if (settings->showHeatMap) {
+        switch (settings->heatMapDecay) {
+            case FADE_SPEED:
+                set_heat_map_fade_action->setChecked(true);
+                break;
+            case PERSIST_SPEED:
+                set_heat_map_persist_action->setChecked(true);
+                break;
+            default:
+                settings->heatMapDecay = FADE_SPEED;
+                break;
+        }
 
-		memory_view->setHeatMapDecay(settings->heatMapDecay);
-	}
-	else
-	{
-		set_heat_map_off_action->setChecked(true);
-	}
+        memory_view->setHeatMapDecay(settings->heatMapDecay);
+    } else {
+        set_heat_map_off_action->setChecked(true);
+    }
 
-	if (settings->debuggerWidth > 0 && settings->debuggerHeight > 0)
-		resize(settings->debuggerWidth, settings->debuggerHeight);
-	else
-		resize(sizeHint().width(), height());
+    if (settings->debuggerWidth > 0 && settings->debuggerHeight > 0)
+        resize(settings->debuggerWidth, settings->debuggerHeight);
+    else
+        resize(sizeHint().width(), height());
 
-	if (settings->debuggerX >= 0 && settings->debuggerY >= 0)
-		move(settings->debuggerX, settings->debuggerY);
+    if (settings->debuggerX >= 0 && settings->debuggerY >= 0)
+        move(settings->debuggerX, settings->debuggerY);
 
-	create_io_devices();
+    create_io_devices();
 }
 
-void DebuggerDialog::create_io_devices()
-{
-	led_device = new io_device("LED Array", settings->ioLEDAddress, 1, false);
-	dip_device = new io_device("DIP Array", settings->ioDIPAddress, 1, true);
+void DebuggerDialog::create_io_devices() {
+    led_device = new io_device("LED Array", settings->ioLEDAddress, 1, false);
+    dip_device = new io_device("DIP Array", settings->ioDIPAddress, 1, true);
 
-	led_array->set_device(led_device);
-	dip_array->set_device(dip_device);
+    led_array->set_device(led_device);
+    dip_array->set_device(dip_device);
 
-	emu_ptr->memory_map->map(led_device);
-	emu_ptr->memory_map->map(dip_device);
+    emu_ptr->memory_map->map(led_device);
+    emu_ptr->memory_map->map(dip_device);
 
-	update_devices();
+    update_devices();
 }
 
-void DebuggerDialog::destroy_io_devices()
-{
-	emu_ptr->memory_map->unmap(led_device);
-	emu_ptr->memory_map->unmap(dip_device);
+void DebuggerDialog::destroy_io_devices() {
+    emu_ptr->memory_map->unmap(led_device);
+    emu_ptr->memory_map->unmap(dip_device);
 
-	led_array->set_device(nullptr);
-	dip_array->set_device(nullptr);
+    led_array->set_device(nullptr);
+    dip_array->set_device(nullptr);
 
-	delete led_device;
-	delete dip_device;
+    delete led_device;
+    delete dip_device;
 
-	led_device = nullptr;
-	dip_device = nullptr;
+    led_device = nullptr;
+    dip_device = nullptr;
 }
 
-void DebuggerDialog::set_parent_window(MainWindow *parent)
-{
-	parent_window = parent;
+void DebuggerDialog::set_parent_window(MainWindow *parent) {
+    parent_window = parent;
 }
 
-void DebuggerDialog::breakpoint_handler(bool checked)
-{
-	(void)checked;
-	pauseAndUpdateDisassembler();
-	update_button_state();
+void DebuggerDialog::breakpoint_handler(bool checked) {
+    (void) checked;
+    pauseAndUpdateDisassembler();
+    update_button_state();
 }
 
-void DebuggerDialog::update_button_state()
-{
-	bool running = emu_ptr->get_running();
-	start_button->setEnabled(!running);
-	stop_button->setEnabled(running);
-	step_into_button->setEnabled(!running);
-	step_over_button->setEnabled(!running);
-	reset_button->setEnabled(running);
+void DebuggerDialog::update_button_state() {
+    bool running = emu_ptr->get_running();
+    start_button->setEnabled(!running);
+    stop_button->setEnabled(running);
+    step_into_button->setEnabled(!running);
+    step_over_button->setEnabled(!running);
+    reset_button->setEnabled(running);
 
-	debug_run_action->setEnabled(!running);
-	debug_stop_action->setEnabled(running);
-	debug_step_into_action->setEnabled(!running);
-	debug_step_over_action->setEnabled(!running);
-	debug_reset_action->setEnabled(running);
+    debug_run_action->setEnabled(!running);
+    debug_stop_action->setEnabled(running);
+    debug_step_into_action->setEnabled(!running);
+    debug_step_over_action->setEnabled(!running);
+    debug_reset_action->setEnabled(running);
 
-	status_view->set_enabled(!running);
+    status_view->set_enabled(!running);
 }
 
-void DebuggerDialog::keyPressEvent(QKeyEvent *event)
-{
-	event->ignore();
+void DebuggerDialog::keyPressEvent(QKeyEvent *event) {
+    event->ignore();
 };
 
-void DebuggerDialog::pauseAndUpdateDisassembler()
-{
-	emu_ptr->halt();
-	offs_t address = emu_ptr->get_status().pc;
+void DebuggerDialog::pauseAndUpdateDisassembler() {
+    emu_ptr->halt();
+    offs_t address = emu_ptr->get_status().pc;
 
-	selectDisassemblyDeviceByAddress(address);
+    selectDisassemblyDeviceByAddress(address);
 
-	disassembly_view->setCurrent(address);
-	disassembly_view->setSelected(address);
+    disassembly_view->setCurrent(address);
+    disassembly_view->setSelected(address);
 }
 
-void DebuggerDialog::stepAndUpdateDisassembler()
-{
-	emu_ptr->step();
-	offs_t address = emu_ptr->get_status().pc;
+void DebuggerDialog::stepAndUpdateDisassembler() {
+    emu_ptr->step();
+    offs_t address = emu_ptr->get_status().pc;
 
-	selectDisassemblyDeviceByAddress(address);
+    selectDisassemblyDeviceByAddress(address);
 
-	disassembly_view->setCurrent(address);
-	disassembly_view->setSelected(address);
+    disassembly_view->setCurrent(address);
+    disassembly_view->setSelected(address);
 }
 
-bool DebuggerDialog::selectDisassemblyDeviceByAddress(offs_t address)
-{
-	for (int i = 0; i < disassembly_selector->count(); ++i)
-	{
-		memory_mapped_device *device = (memory_mapped_device *)(quintptr)disassembly_selector->itemData(i).toULongLong();
-		if (device && address >= device->get_start() && address <= device->get_end())
-		{
-			disassembly_selector->setCurrentIndex(i);
-			return true;
-		}
-	}
-	return false;
+bool DebuggerDialog::selectDisassemblyDeviceByAddress(offs_t address) {
+    for (int i = 0; i < disassembly_selector->count(); ++i) {
+        memory_mapped_device *device = (memory_mapped_device *) (quintptr) disassembly_selector->itemData(i).
+                toULongLong();
+        if (device && address >= device->get_start() && address <= device->get_end()) {
+            disassembly_selector->setCurrentIndex(i);
+            return true;
+        }
+    }
+    return false;
 }
 
-bool DebuggerDialog::selectMemoryDeviceByAddress(offs_t address)
-{
-	for (int i = 0; i < memory_selector->count(); ++i)
-	{
-		memory_mapped_device *device = (memory_mapped_device *)(quintptr)memory_selector->itemData(i).toULongLong();
-		if (device && address >= device->get_start() && address <= device->get_end())
-		{
-			memory_selector->setCurrentIndex(i);
-			return true;
-		}
-	}
-	return false;
+bool DebuggerDialog::selectMemoryDeviceByAddress(offs_t address) {
+    for (int i = 0; i < memory_selector->count(); ++i) {
+        memory_mapped_device *device = (memory_mapped_device *) (quintptr) memory_selector->itemData(i).toULongLong();
+        if (device && address >= device->get_start() && address <= device->get_end()) {
+            memory_selector->setCurrentIndex(i);
+            return true;
+        }
+    }
+    return false;
 }
 
 void DebuggerDialog::keyReleaseEvent(QKeyEvent *event) {
-	(void)event;
+    (void) event;
 };
 
-void DebuggerDialog::resizeEvent(QResizeEvent *event)
-{
-	QDialog::resizeEvent(event);
-	LOG_DEBUG << "memory_groupBox width:" << memory_groupBox->width()
-			  << "disassembly_groupBox width:" << disassembly_groupBox->width()
-			  << "status_groupBox width:" << status_groupBox->width();
+void DebuggerDialog::resizeEvent(QResizeEvent *event) {
+    QDialog::resizeEvent(event);
+    LOG_DEBUG << "memory_groupBox width:" << memory_groupBox->width()
+            << "disassembly_groupBox width:" << disassembly_groupBox->width()
+            << "status_groupBox width:" << status_groupBox->width();
 }
 
-void DebuggerDialog::closeEvent(QCloseEvent *event)
-{
-	destroy_io_devices();
+void DebuggerDialog::closeEvent(QCloseEvent *event) {
+    destroy_io_devices();
 
-	if (labels_dialog)
-		labels_dialog->close();
+    if (labels_dialog)
+        labels_dialog->close();
 
-	if (breakpoints_dialog)
-		breakpoints_dialog->close();
+    if (breakpoints_dialog)
+        breakpoints_dialog->close();
 
-	if (settings)
-	{
-		settings->debuggerX = pos().x();
-		settings->debuggerY = pos().y();
-		settings->debuggerWidth = width();
-		settings->debuggerHeight = height();
-	}
+    if (settings) {
+        settings->debuggerX = pos().x();
+        settings->debuggerY = pos().y();
+        settings->debuggerWidth = width();
+        settings->debuggerHeight = height();
+    }
 
-	if (emu_ptr && !emu_ptr->get_running())
-		emu_ptr->resume();
+    if (emu_ptr && !emu_ptr->get_running())
+        emu_ptr->resume();
 
-	QDialog::closeEvent(event);
+    QDialog::closeEvent(event);
 }
 
-void DebuggerDialog::load_rom()
-{
-	File::load_rom_dialog(this, emu_ptr, parent_window->load_rom_settings, settings->romDir);
-	after_load_rom();
+void DebuggerDialog::load_rom() {
+    File::load_rom_dialog(this, emu_ptr, parent_window->load_rom_settings, settings->romDir);
+    after_load_rom();
 }
 
-void DebuggerDialog::load_ram()
-{
-	File::load_ram_dialog(this, emu_ptr, parent_window->load_ram_settings, settings->ramDir, settings->clearRamOnLoad);
-	after_load_ram();
+void DebuggerDialog::load_ram() {
+    File::load_ram_dialog(this, emu_ptr, parent_window->load_ram_settings, settings->ramDir, settings->clearRamOnLoad);
+    after_load_ram();
 }
 
-void DebuggerDialog::save_ram()
-{
-	File::save_ram_dialog(this, emu_ptr, parent_window->save_ram_settings, settings->ramDir);
+void DebuggerDialog::save_ram() {
+    File::save_ram_dialog(this, emu_ptr, parent_window->save_ram_settings, settings->ramDir);
 }
 
-void DebuggerDialog::reset_disassembly_view()
-{
-	disassembly_view->rebuild();
-	QVariant v = disassembly_selector->itemData(disassembly_selector->currentIndex());
-	memory_mapped_device *device = (memory_mapped_device *)v.value<quintptr>();
-	disassembly_view->set_range(device->get_start(), device->get_end(), device->get_mapped_memory());
+void DebuggerDialog::reset_disassembly_view() {
+    disassembly_view->rebuild();
+    QVariant v = disassembly_selector->itemData(disassembly_selector->currentIndex());
+    memory_mapped_device *device = (memory_mapped_device *) v.value<quintptr>();
+    disassembly_view->set_range(device->get_start(), device->get_end(), device->get_mapped_memory());
 }
 
-void DebuggerDialog::save_ram_labels()
-{
-	memory_mapped_device *device = emu_ptr->memory_map->try_get_block_device("RAM");
-	if (device)
-		File::save_labels_dialog(this, emu_ptr, device->get_start(), device->get_end(), settings->labelsDir);
+void DebuggerDialog::save_ram_labels() {
+    memory_mapped_device *device = emu_ptr->memory_map->try_get_block_device("RAM");
+    if (device)
+        File::save_labels_dialog(this, emu_ptr, device->get_start(), device->get_end(), settings->labelsDir);
 }
 
-void DebuggerDialog::save_labels()
-{
-	QVariant v = disassembly_selector->itemData(disassembly_selector->currentIndex());
-	memory_mapped_device *device = (memory_mapped_device *)v.value<quintptr>();
-	if (device)
-		File::save_labels_dialog(this, emu_ptr, device->get_start(), device->get_end(), settings->labelsDir);
-	else
-		File::save_labels_dialog(this, emu_ptr, settings->labelsDir);
+void DebuggerDialog::save_labels() {
+    QVariant v = disassembly_selector->itemData(disassembly_selector->currentIndex());
+    memory_mapped_device *device = (memory_mapped_device *) v.value<quintptr>();
+    if (device)
+        File::save_labels_dialog(this, emu_ptr, device->get_start(), device->get_end(), settings->labelsDir);
+    else
+        File::save_labels_dialog(this, emu_ptr, settings->labelsDir);
 }
 
-void DebuggerDialog::after_load_rom()
-{
-	refresh();
-	update_button_state();
-	memory_view->scrollTo(0);
-	disassembly_view->scrollTo(0);
+void DebuggerDialog::after_load_rom() {
+    refresh();
+    update_button_state();
+    memory_view->scrollTo(0);
+    disassembly_view->scrollTo(0);
 }
 
-void DebuggerDialog::after_load_ram()
-{
-	refresh();
-	update_button_state();
-	memory_view->scrollTo(0);
-	disassembly_view->scrollTo(0);
+void DebuggerDialog::after_load_ram() {
+    refresh();
+    update_button_state();
+    memory_view->scrollTo(0);
+    disassembly_view->scrollTo(0);
 }
 
-void DebuggerDialog::clear_ram()
-{
-	ClearRamDialog clearRamDialog;
+void DebuggerDialog::clear_ram() {
+    ClearRamDialog clearRamDialog;
 
-	clearRamDialog.setSettings(clearRamSettings);
+    clearRamDialog.setSettings(clearRamSettings);
 
-	QDialog::DialogCode result = (QDialog::DialogCode)clearRamDialog.exec();
+    QDialog::DialogCode result = (QDialog::DialogCode) clearRamDialog.exec();
 
-	if (result == QDialog::DialogCode::Accepted)
-	{
-		clearRamSettings = clearRamDialog.getSettings();
+    if (result == QDialog::DialogCode::Accepted) {
+        clearRamSettings = clearRamDialog.getSettings();
 
-		memory_mapped_device *ram = emu_ptr->memory_map->try_get_block_device("RAM");
+        memory_mapped_device *ram = emu_ptr->memory_map->try_get_block_device("RAM");
 
-		if (ram != nullptr)
-		{
-			bool was_running = emu_ptr->get_running();
-			if (was_running)
-				emu_ptr->stop();
+        if (ram != nullptr) {
+            bool was_running = emu_ptr->get_running();
+            if (was_running)
+                emu_ptr->stop();
 
-			uint16_t addr = clearRamSettings.start;
-			while (addr <= clearRamSettings.end)
-			{
-				ram->write(addr, clearRamSettings.value);
-				addr++;
-			}
+            uint16_t addr = clearRamSettings.start;
+            while (addr <= clearRamSettings.end) {
+                ram->write(addr, clearRamSettings.value);
+                addr++;
+            }
 
-			if (was_running)
-			{
-				emu_ptr->reset();
-				emu_ptr->start();
-			}
+            if (was_running) {
+                emu_ptr->reset();
+                emu_ptr->start();
+            }
 
-			disassembly_view->rebuild();
-		}
-	}
+            disassembly_view->rebuild();
+        }
+    }
 }
 
-void DebuggerDialog::diassembly_refresh()
-{
-	disassembly_view->rebuild();
+void DebuggerDialog::diassembly_refresh() {
+    disassembly_view->rebuild();
 }
 
-void DebuggerDialog::goto_label()
-{
-	GotoDialog gotoDialog;
-	gotoDialog.setLabels(emu_ptr->labels->getLabels());
+void DebuggerDialog::goto_label() {
+    GotoDialog gotoDialog;
+    gotoDialog.setLabels(emu_ptr->labels->getLabels());
 
-	QDialog::DialogCode result = (QDialog::DialogCode)gotoDialog.exec();
+    QDialog::DialogCode result = (QDialog::DialogCode) gotoDialog.exec();
 
-	if (result == QDialog::DialogCode::Accepted)
-	{
-		offs_t address = gotoDialog.getSelectedAddress();
-		memory_mapped_device *device = emu_ptr->get_block_device(address);
-		int start = device->get_start();
+    if (result == QDialog::DialogCode::Accepted) {
+        offs_t address = gotoDialog.getSelectedAddress();
+        memory_mapped_device *device = emu_ptr->get_block_device(address);
+        int start = device->get_start();
 
-		selectDisassemblyDeviceByAddress(start);
+        selectDisassemblyDeviceByAddress(start);
 
-		disassembly_view->setSelected(address);
-	}
+        disassembly_view->setSelected(address);
+    }
 }
 
-void DebuggerDialog::load_labels()
-{
-	memory_mapped_device *device = emu_ptr->memory_map->try_get_block_device("RAM");
+void DebuggerDialog::load_labels() {
+    memory_mapped_device *device = emu_ptr->memory_map->try_get_block_device("RAM");
 
-	File::load_labels_dialog(this, emu_ptr, device->get_start(), device->get_end(), settings->labelsDir);
+    File::load_labels_dialog(this, emu_ptr, device->get_start(), device->get_end(), settings->labelsDir);
 
-	reset_disassembly_view();
+    reset_disassembly_view();
 
-	if (labels_dialog)
-		labels_dialog->populate_labels_table();
+    if (labels_dialog)
+        labels_dialog->populate_labels_table();
 }
 
-void DebuggerDialog::load_breakpoints()
-{
-	File::load_breakpoint_dialog(this, emu_ptr, settings->breakpointsDir);
-	populate_breakpoints_table();
-	disassembly_view->rebuild();
+void DebuggerDialog::load_breakpoints() {
+    File::load_breakpoint_dialog(this, emu_ptr, settings->breakpointsDir);
+    populate_breakpoints_table();
+    disassembly_view->rebuild();
 }
 
-void DebuggerDialog::save_breakpoints()
-{
-	File::save_breakpoint_dialog(this, emu_ptr, settings->breakpointsDir);
+void DebuggerDialog::save_breakpoints() {
+    File::save_breakpoint_dialog(this, emu_ptr, settings->breakpointsDir);
 }
 
-void DebuggerDialog::load_default_labels()
-{
-	if (labels_dialog)
-		labels_dialog->load_default_labels();
+void DebuggerDialog::load_default_labels() {
+    if (labels_dialog)
+        labels_dialog->load_default_labels();
 }
 
-void DebuggerDialog::populate_breakpoints_table()
-{
-	if (breakpoints_dialog)
-		breakpoints_dialog->populate_breakpoints_table();
+void DebuggerDialog::populate_breakpoints_table() {
+    if (breakpoints_dialog)
+        breakpoints_dialog->populate_breakpoints_table();
 }
 
-void DebuggerDialog::update_clear_ram_labels_state()
-{
+void DebuggerDialog::update_clear_ram_labels_state() {
 }
 
-void DebuggerDialog::show_labels_dialog()
-{
-	labels_dialog->show();
-	labels_dialog->raise();
-	labels_dialog->activateWindow();
+void DebuggerDialog::show_labels_dialog() {
+    labels_dialog->show();
+    labels_dialog->raise();
+    labels_dialog->activateWindow();
 }
 
-void DebuggerDialog::show_breakpoints_dialog()
-{
-	breakpoints_dialog->show();
-	breakpoints_dialog->raise();
-	breakpoints_dialog->activateWindow();
+void DebuggerDialog::show_breakpoints_dialog() {
+    breakpoints_dialog->show();
+    breakpoints_dialog->raise();
+    breakpoints_dialog->activateWindow();
 }
 
-void DebuggerDialog::show_save_view_dialog()
-{
-	memory_mapped_device *dasm = get_disassembly_device();
-	memory_mapped_device *mem = get_memory_device();
+void DebuggerDialog::show_save_view_dialog() {
+    memory_mapped_device *dasm = get_disassembly_device();
+    memory_mapped_device *mem = get_memory_device();
 
-	SnapFileSettings snap_settings = SnapFileSettings{true, true, true};
-	// snap_settings.include_dasm = settings->showDasmView;
-	// snap_settings.include_mem = settings->showMemoryView;
+    SnapFileSettings snap_settings = SnapFileSettings{true, true, true};
+    // snap_settings.include_dasm = settings->showDasmView;
+    // snap_settings.include_mem = settings->showMemoryView;
 
-	File::save_memory_mapped_devices_dialog(this, emu_ptr, dasm, mem, snap_settings);
+    File::save_memory_mapped_devices_dialog(this, emu_ptr, dasm, mem, snap_settings);
 }
 
-memory_mapped_device *DebuggerDialog::get_disassembly_device()
-{
-	QVariant v = disassembly_selector->itemData(disassembly_selector->currentIndex());
-	memory_mapped_device *device = (memory_mapped_device *)v.value<quintptr>();
-	return device;
+memory_mapped_device *DebuggerDialog::get_disassembly_device() {
+    QVariant v = disassembly_selector->itemData(disassembly_selector->currentIndex());
+    memory_mapped_device *device = (memory_mapped_device *) v.value<quintptr>();
+    return device;
 }
 
-memory_mapped_device *DebuggerDialog::get_memory_device()
-{
-	QVariant v = memory_selector->itemData(memory_selector->currentIndex());
-	memory_mapped_device *device = (memory_mapped_device *)v.value<quintptr>();
-	return device;
+memory_mapped_device *DebuggerDialog::get_memory_device() {
+    QVariant v = memory_selector->itemData(memory_selector->currentIndex());
+    memory_mapped_device *device = (memory_mapped_device *) v.value<quintptr>();
+    return device;
 }
 
-void DebuggerDialog::add_breakpoint(offs_t address)
-{
-	emu_ptr->add_breakpoint(address);
-	populate_breakpoints_table();
+void DebuggerDialog::add_breakpoint(offs_t address) {
+    emu_ptr->add_breakpoint(address);
+    populate_breakpoints_table();
 }
 
-void DebuggerDialog::remove_breakpoint(offs_t address)
-{
-	emu_ptr->remove_breakpoint(address);
-	populate_breakpoints_table();
+void DebuggerDialog::remove_breakpoint(offs_t address) {
+    emu_ptr->remove_breakpoint(address);
+    populate_breakpoints_table();
 }
 
-void DebuggerDialog::add_or_remove_breakpoint(offs_t address)
-{
-	emu_ptr->add_or_remove_breakpoint(address);
-	populate_breakpoints_table();
+void DebuggerDialog::add_or_remove_breakpoint(offs_t address) {
+    emu_ptr->add_or_remove_breakpoint(address);
+    populate_breakpoints_table();
 }
 
-void DebuggerDialog::set_breakpoint_enabled(offs_t address, bool enabled)
-{
-	emu_ptr->breakpoints->setEnabled(address, enabled);
-	populate_breakpoints_table();
+void DebuggerDialog::set_breakpoint_enabled(offs_t address, bool enabled) {
+    emu_ptr->breakpoints->setEnabled(address, enabled);
+    populate_breakpoints_table();
 }
 
-void DebuggerDialog::show_devices_dialog()
-{
-	devices_dialog->show();
-	devices_dialog->raise();
-	devices_dialog->activateWindow();
+void DebuggerDialog::show_devices_dialog() {
+    devices_dialog->show();
+    devices_dialog->raise();
+    devices_dialog->activateWindow();
 }
 
-void DebuggerDialog::exit()
-{
-	close();
+void DebuggerDialog::exit() {
+    close();
 }
 
 
-void DebuggerDialog::show_io_settings()
-{
+void DebuggerDialog::show_io_settings() {
     if (emu_ptr == nullptr)
         return;
 
     IOSettingsDialog *io_settings_dialog = new IOSettingsDialog(this);
 
-    io_settings_dialog->address_in_use = [this](offs_t address)
-    {
+    io_settings_dialog->address_in_use = [this](offs_t address) {
         return address_in_use(address);
     };
 
-    io_settings_dialog->setIOSettings(IOSettingsInfo({(offs_t)settings->ioLEDAddress, (offs_t)settings->ioDIPAddress}));
+    io_settings_dialog->setIOSettings(
+        IOSettingsInfo({(offs_t) settings->ioLEDAddress, (offs_t) settings->ioDIPAddress}));
 
-    if (io_settings_dialog->exec() == QDialog::Accepted)
-    {
+    if (io_settings_dialog->exec() == QDialog::Accepted) {
         IOSettingsInfo info = io_settings_dialog->getIOSettings();
 
-        if (info.led_address != static_cast<offs_t>(settings->ioLEDAddress) || info.dip_address != static_cast<offs_t>(settings->ioDIPAddress))
-        {
+        if (info.led_address != static_cast<offs_t>(settings->ioLEDAddress) || info.dip_address != static_cast<offs_t>(
+                settings->ioDIPAddress)) {
             settings->ioLEDAddress = info.led_address;
             settings->ioDIPAddress = info.dip_address;
 
@@ -765,10 +665,8 @@ void DebuggerDialog::show_io_settings()
 }
 
 
-bool DebuggerDialog::address_in_use(offs_t address)
-{
-    for (auto *device : emu_ptr->memory_map->get_block_devices())
-    {
+bool DebuggerDialog::address_in_use(offs_t address) {
+    for (auto *device: emu_ptr->memory_map->get_block_devices()) {
         if (device == led_device || device == dip_device)
             continue;
 
