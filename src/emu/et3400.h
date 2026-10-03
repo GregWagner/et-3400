@@ -6,7 +6,6 @@
 #include "../util/breakpoint_manager.h"
 #include "../util/disassembly_builder.h"
 #include "../util/label_manager.h"
-#include "../util/sleep.h"
 
 #include <QFile>
 #include <QString>

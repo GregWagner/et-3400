@@ -13,7 +13,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) : QDialog(
 }
 
 QWidget *SettingsDialog::createTabs() {
-    QTabWidget *tabs = new QTabWidget(this);
+    auto tabs = new QTabWidget(this);
     tabs->addTab(createClockRateTab(), "Clock Rate");
     tabs->addTab(createGeneralTab(), "General");
     tabs->addTab(createDisplayTab(), "Display");
@@ -21,10 +21,10 @@ QWidget *SettingsDialog::createTabs() {
 }
 
 QWidget *SettingsDialog::createClockRateTab() {
-    QWidget *tab = new QWidget();
-    QVBoxLayout *verticalLayout = new QVBoxLayout(tab);
+    auto tab = new QWidget();
+    auto verticalLayout = new QVBoxLayout(tab);
 
-    QHBoxLayout *horizontalLayout = new QHBoxLayout();
+    auto horizontalLayout = new QHBoxLayout();
     horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
 
     radioButton_Hz = new QRadioButton(tab);
@@ -67,7 +67,7 @@ QWidget *SettingsDialog::createClockRateTab() {
     reset_button = new QPushButton("Reset Clock", tab);
     reset_button->setFixedWidth(120);
 
-    QHBoxLayout *resetLayout = new QHBoxLayout();
+    auto resetLayout = new QHBoxLayout();
     resetLayout->addStretch();
     resetLayout->addWidget(reset_button);
     resetLayout->addStretch();
@@ -91,12 +91,12 @@ QWidget *SettingsDialog::createClockRateTab() {
 }
 
 QWidget *SettingsDialog::createGeneralTab() {
-    QWidget *tab = new QWidget();
-    QVBoxLayout *verticalLayout = new QVBoxLayout(tab);
+    auto tab = new QWidget();
+    auto verticalLayout = new QVBoxLayout(tab);
 
-    QHBoxLayout *horizontalLayout = new QHBoxLayout();
+    auto horizontalLayout = new QHBoxLayout();
     clear_ram_checkbox = new QCheckBox("Clear before loading RAM", tab);
-    QLabel *clear_ram_label = new QLabel("Sets RAM to zero before loading new content", tab);
+    auto clear_ram_label = new QLabel("Sets RAM to zero before loading new content", tab);
     clear_ram_label->setWordWrap(true);
 
     horizontalLayout->addWidget(clear_ram_checkbox);
@@ -111,13 +111,13 @@ QWidget *SettingsDialog::createGeneralTab() {
 }
 
 QWidget *SettingsDialog::createDisplayTab() {
-    QWidget *tab = new QWidget();
-    QVBoxLayout *verticalLayout = new QVBoxLayout(tab);
+    auto tab = new QWidget();
+    auto verticalLayout = new QVBoxLayout(tab);
 
-    QHBoxLayout *horizontalLayout = new QHBoxLayout();
+    auto horizontalLayout = new QHBoxLayout();
     show_bit0_display_writes_checkbox = new QCheckBox(
         "Only show writes to bit 0 for display addresses in the memory pane", tab);
-    QLabel *show_bit0_label = new QLabel(
+    auto show_bit0_label = new QLabel(
         "Display latches are only connected to bit 0 of the data bus. Enabling this option will cause the memory pane to show only writes to bit 0",
         tab);
     show_bit0_label->setWordWrap(true);
@@ -141,7 +141,7 @@ void SettingsDialog::setupUi(QDialog *Dialog) {
 
     Dialog->resize(408, 280);
 
-    QVBoxLayout *mainLayout = new QVBoxLayout(Dialog);
+    auto mainLayout = new QVBoxLayout(Dialog);
     mainLayout->setObjectName(QStringLiteral("mainLayout"));
 
     buttonBox = new QDialogButtonBox(this);
@@ -164,7 +164,7 @@ void SettingsDialog::setupUi(QDialog *Dialog) {
     setWindowTitle("Settings");
 } // setupUi
 
-void SettingsDialog::retranslateUi(QDialog *Dialog) {
+void SettingsDialog::retranslateUi(QDialog *Dialog) const {
     Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", nullptr));
     radioButton_Hz->setText(QApplication::translate("Dialog", "Hz", nullptr));
     radioButton_kHz->setText(QApplication::translate("Dialog", "kHz", nullptr));

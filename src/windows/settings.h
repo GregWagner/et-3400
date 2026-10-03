@@ -95,7 +95,7 @@ private:
 
     void setupUi(QDialog *Dialog);
 
-    void retranslateUi(QDialog *Dialog);
+    void retranslateUi(QDialog *Dialog) const;
 };
 
 #endif // SETTINGS_H
